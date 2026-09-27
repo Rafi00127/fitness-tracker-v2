@@ -36,7 +36,9 @@ The system will require environment variables for:
 - reject invalid or expired tokens
 - prevent token leakage via logs or client-side storage mistakes
 - rotate refresh tokens where applicable
-- use secure cookie configuration for browser flows when applicable
+- send browser refresh tokens only in HTTP-only cookies
+- store refresh token hashes rather than bearer tokens in the database
+- fail application startup when required token secrets are missing, weak, or identical
 
 ## 6. Authorization Security
 
@@ -110,3 +112,5 @@ Examples:
 ## 15. Current Security Assumptions
 
 The project treats health and fitness records as sensitive personal data. Social and AI features remain future scope and should not be implemented until the organization has reviewed the privacy and security implications of those features.
+
+The Phase 2 refresh cookie is `SameSite=Lax`, scoped to `/api/v1/auth`, and marked `Secure` in production. Access tokens are short-lived (15 minutes) and are sent using the Authorization bearer scheme.

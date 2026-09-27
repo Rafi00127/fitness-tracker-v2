@@ -74,9 +74,13 @@ The following endpoints are expected at minimum:
 Authentication requirements:
 
 - registration creates a user and password hash
-- login validates credentials and returns tokens
+- login validates credentials and returns an access token
+- registration and login set a refresh token in an HTTP-only cookie; the token is never included in JSON
 - refresh rotates refresh tokens securely
-- logout invalidates or clears tokens on the server side as applicable
+- refresh and logout use the `refresh_token` cookie scoped to `/api/v1/auth`
+- logout invalidates the presented refresh token and clears the cookie
+
+Authentication success responses use the documented `data` and `meta` envelope. The refresh endpoint does not accept a refresh token in its JSON body.
 
 ## 6. User and Profile Endpoints
 

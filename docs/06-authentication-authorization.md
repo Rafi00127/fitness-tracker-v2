@@ -39,12 +39,13 @@ The logout flow should:
 
 The starting design for the application is:
 
-- access token for authenticated API calls
-- refresh token for token renewal
-- secure storage for browsers using HTTP-only cookies or equivalent secure patterns
-- Authorization headers supported for API clients or future non-browser clients
+- short-lived access token returned in the authentication response for API calls
+- refresh token delivered only in an HTTP-only cookie for browser clients
+- refresh token hashes stored in the database; plaintext refresh tokens are never persisted
+- Authorization bearer headers for access tokens used by API clients or future non-browser clients
+- production refresh cookies use `Secure`, `HttpOnly`, `SameSite=Lax`, and an auth-only path
 
-This default is intentionally simple and compatible with a standard REST API. It should remain flexible enough for future mobile or external clients without forcing a redesign.
+The refresh cookie is scoped to `/api/v1/auth`. Clients must send the cookie when calling refresh or logout. Refresh tokens are not returned in JSON responses.
 
 ## 6. Refresh Behavior
 
@@ -54,13 +55,17 @@ The refresh flow should:
 - verify the user and token integrity
 - rotate the refresh token to reduce replay risk
 - reject invalid or expired tokens with clear API errors
+- revoke the previous token and persist only the hash of the replacement
 
 ## 7. Password Handling
 
 - never store plaintext passwords
 - always hash with a strong password hashing algorithm
+- limit passwords to 72 UTF-8 bytes while bcrypt is used
 - avoid leaking password requirements or hashes in logs or responses
 - handle unsuccessful login attempts in a safe and rate-limited way
+
+The API requires distinct `JWT_SECRET` and `REFRESH_TOKEN_SECRET` values of at least 32 characters at startup. There are no fallback or development secrets.
 
 ## 8. Authorization Model
 
@@ -117,3 +122,11 @@ The project should leave room for future role-based authorization if the applica
 The frontend must never be treated as the source of truth for authorization. Client-side hiding of buttons or sections is not enough.
 
 The backend is the single source of truth for access decisions.
+
+## 14. Phase 2 Session Behavior
+
+- registration and login issue a short-lived access token and set a refresh cookie
+- refresh atomically revokes the presented token and rotates to a new token
+- logout revokes the presented refresh token and clears the cookie
+- access tokens are not revoked individually; they expire after 15 minutes
+- existing refresh sessions are revoked when migrating from plaintext-token storage

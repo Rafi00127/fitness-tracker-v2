@@ -308,7 +308,8 @@ Large audit or event tables are not required for MVP unless a real requirement e
 - Health and fitness data are considered sensitive.
 - PII should be reduced when possible.
 - Password hashes must never be stored in plain text.
-- Tokens, secrets, and credentials must never be persisted in application tables.
+- Secrets and plaintext credentials must never be persisted in application tables.
+- Refresh tokens may be persisted only as one-way hashes to support rotation and revocation.
 - Logs must avoid writing sensitive values.
 
 ## 10. Deletion Behavior

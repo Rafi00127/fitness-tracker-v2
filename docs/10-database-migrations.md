@@ -26,6 +26,8 @@ Each migration should be checked for:
 - overly broad data changes
 - compatibility with existing data
 
+The Phase 2 refresh-token migration hashes existing stored tokens and revokes those sessions so plaintext credentials are not retained. Users with pre-migration refresh tokens must sign in again.
+
 ## 4. Production Safety
 
 Production migrations must be treated carefully. Before applying a migration to a production environment, the team should confirm:

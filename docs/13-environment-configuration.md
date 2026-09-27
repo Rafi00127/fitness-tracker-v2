@@ -49,10 +49,10 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXTAUTH_URL=http://localhost:3000
 
 # API
-API_PORT=3001
+PORT=3001
 API_BASE_URL=http://localhost:3001
-JWT_SECRET=replace-me
-REFRESH_TOKEN_SECRET=replace-me
+JWT_SECRET=replace-with-a-random-secret-of-at-least-32-characters
+REFRESH_TOKEN_SECRET=replace-with-a-different-random-secret-of-at-least-32-characters
 
 # Database
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/fitness_tracker_dev
@@ -64,6 +64,8 @@ POSTGRES_PASSWORD=postgres
 ```
 
 The exact values may evolve as the project is scaffolded.
+
+For local API startup, copy the root `.env.example` to `.env` and replace both token-secret placeholders with different random values of at least 32 UTF-8 bytes. The API loads the root `.env` file; placeholder, missing, weak, or identical secrets prevent startup.
 
 ## 5. Secret Handling
 
