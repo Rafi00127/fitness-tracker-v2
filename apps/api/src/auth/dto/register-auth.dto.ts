@@ -2,11 +2,11 @@ import { IsEmail, IsOptional, IsString, Length } from 'class-validator';
 
 export class RegisterAuthDto {
   @IsEmail()
-  email: string;
+  email!: string;
 
   @IsString()
   @Length(8, 72)
-  password: string;
+  password!: string;
 
   @IsOptional()
   @IsString()

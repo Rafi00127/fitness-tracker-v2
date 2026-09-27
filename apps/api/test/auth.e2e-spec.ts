@@ -1,4 +1,4 @@
-import { ValidationPipe } from '@nestjs/common';
+import { UnauthorizedException, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
   afterEach,
@@ -9,7 +9,7 @@ import {
   jest,
 } from '@jest/globals';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { AuthController } from '../src/auth/auth.controller';
 import { AuthService } from '../src/auth/auth.service';
 import { ApiExceptionFilter } from '../src/common/api-exception.filter';
@@ -27,9 +27,7 @@ describe('AuthController (e2e)', () => {
   const authService = {
     register: jest.fn<() => Promise<AuthResponse>>(),
     login: jest.fn<() => Promise<AuthResponse>>(),
-    refresh: jest.fn<
-      () => Promise<{ accessToken: string; refreshToken: string }>
-    >(),
+    refresh: jest.fn<() => Promise<AuthResponse>>(),
     logout: jest.fn<() => Promise<{ success: boolean }>>(),
   };
 
@@ -78,9 +76,7 @@ describe('AuthController (e2e)', () => {
     expect(response.body.data.accessToken).toBe('access-token');
     expect(response.body.data.refreshToken).toBeUndefined();
     expect(response.headers['set-cookie'][0]).toContain('HttpOnly');
-    expect(response.headers['set-cookie'][0]).toContain(
-      'Path=/api/v1/auth',
-    );
+    expect(response.headers['set-cookie'][0]).toContain('Path=/api/v1/auth');
   });
 
   it('rejects invalid registration input with the documented error envelope', async () => {
@@ -114,6 +110,7 @@ describe('AuthController (e2e)', () => {
 
   it('rotates the cookie on refresh and clears it on logout', async () => {
     authService.refresh.mockResolvedValue({
+      user: { id: 'user-1', email: 'user@example.com', name: null },
       accessToken: 'new-access-token',
       refreshToken: 'new-refresh-token',
     });
@@ -127,6 +124,7 @@ describe('AuthController (e2e)', () => {
 
     expect(authService.refresh).toHaveBeenCalledWith('old-refresh-token');
     expect(refreshed.body.data.accessToken).toBe('new-access-token');
+    expect(refreshed.body.data.user.email).toBe('user@example.com');
     expect(refreshed.headers['set-cookie'][0]).toContain(
       'refresh_token=new-refresh-token',
     );
@@ -150,5 +148,20 @@ describe('AuthController (e2e)', () => {
 
     expect(response.body.error.code).toBe('UNAUTHORIZED');
     expect(authService.refresh).not.toHaveBeenCalled();
+  });
+
+  it('clears a refresh cookie rejected by the authentication service', async () => {
+    authService.refresh.mockRejectedValue(
+      new UnauthorizedException('Invalid refresh token'),
+    );
+
+    const nestApp = await createApplication();
+    const response = await request(nestApp.getHttpServer())
+      .post('/api/v1/auth/refresh')
+      .set('Cookie', 'refresh_token=invalid-token')
+      .expect(401);
+
+    expect(response.headers['set-cookie'][0]).toContain('refresh_token=;');
+    expect(response.body.error.code).toBe('UNAUTHORIZED');
   });
 });

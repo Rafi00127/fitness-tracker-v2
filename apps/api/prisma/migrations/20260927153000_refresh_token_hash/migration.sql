@@ -46,16 +46,13 @@ BEGIN
             "revokedAt" = COALESCE("revokedAt", CURRENT_TIMESTAMP);
     END IF;
 
-    IF EXISTS (
-        SELECT 1 FROM pg_constraint
-        WHERE conname = 'RefreshToken_token_key'
-    ) AND NOT EXISTS (
-        SELECT 1 FROM pg_constraint
-        WHERE conname = 'RefreshToken_tokenHash_key'
-    ) THEN
-        ALTER TABLE "RefreshToken"
-        RENAME CONSTRAINT "RefreshToken_token_key"
-        TO "RefreshToken_tokenHash_key";
+    IF to_regclass(
+        format('%I.%I', current_schema(), 'RefreshToken_token_key')
+    ) IS NOT NULL AND to_regclass(
+        format('%I.%I', current_schema(), 'RefreshToken_tokenHash_key')
+    ) IS NULL THEN
+        ALTER INDEX "RefreshToken_token_key"
+        RENAME TO "RefreshToken_tokenHash_key";
     END IF;
 END
 $migration$;

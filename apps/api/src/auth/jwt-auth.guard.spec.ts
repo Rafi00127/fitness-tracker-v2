@@ -1,6 +1,5 @@
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { AUTH_CONFIGURATION } from './auth.constants';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
 describe('JwtAuthGuard', () => {
@@ -42,10 +41,7 @@ describe('JwtAuthGuard', () => {
     const request: { headers: { authorization: string }; user?: unknown } = {
       headers: { authorization: 'Bearer signed-token' },
     };
-    const context = createContext(
-      request.headers.authorization,
-      request,
-    );
+    const context = createContext(request.headers.authorization, request);
 
     await expect(guard.canActivate(context)).resolves.toBe(true);
     expect(request.user).toEqual({ sub: 'user-1' });

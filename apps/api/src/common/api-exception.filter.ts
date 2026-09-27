@@ -79,5 +79,7 @@ function getErrorMessage(status: number, message: unknown): string {
     return 'An unexpected error occurred.';
   }
 
-  return typeof message === 'string' ? message : 'The request could not be completed.';
+  return typeof message === 'string'
+    ? message
+    : 'The request could not be completed.';
 }

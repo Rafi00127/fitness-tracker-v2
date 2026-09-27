@@ -10,6 +10,10 @@ config({ path: resolve(__dirname, '../../../.env') });
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api/v1');
+  app.enableCors({
+    origin: process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
+    credentials: true,
+  });
   app.useGlobalFilters(new ApiExceptionFilter());
   app.useGlobalPipes(
     new ValidationPipe({

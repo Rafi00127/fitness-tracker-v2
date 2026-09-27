@@ -35,13 +35,20 @@ The application is a user-centric fitness tracker with a clear personal dashboar
 - submit button with loading state
 - forgot-password flow may be future work, not initial MVP
 - alternate registration link
+- submits to `/api/v1/auth/login` and requests cookie credentials
+- keeps the access token in application memory only
+- displays the signed-in account and a sign-out action after authentication
 
 ### Registration
 
 - email, password, and confirmation fields
+- optional name field
 - password strength guidance, if implemented
 - explicit validation errors
-- success state redirect to login or onboarding
+- confirmation is validated before the registration request
+- successful registration establishes a session and displays a success state
+
+The refresh token is never exposed to page JavaScript or browser storage. The HTTP-only cookie restores the in-memory access-token session on application load.
 
 ### Account lifecycle states
 

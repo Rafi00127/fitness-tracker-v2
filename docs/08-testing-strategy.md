@@ -107,4 +107,4 @@ Before feature completion and before merging changes, the project should run the
 
 ## 8. Current Test Assumptions
 
-The project is still documentation-first and no source code has been created yet. The exact unit, integration, and E2E suite will be introduced during implementation in a phased and minimal way that matches the MVP and roadmap requirements.
+Phase 2 includes unit tests for password/token handling and authorization guards, API E2E tests for registration, login, refresh, logout, and validation, and Playwright tests for the browser authentication screens. API route tests mock persistence; browser tests intercept the API. Neither suite requires a running PostgreSQL instance. The Prisma migration still requires PostgreSQL to validate and apply.

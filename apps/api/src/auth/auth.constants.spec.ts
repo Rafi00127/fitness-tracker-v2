@@ -11,8 +11,17 @@ describe('loadAuthConfiguration', () => {
 
     expect(() =>
       loadAuthConfiguration({
+        JWT_SECRET: 'replace-with-a-random-secret-of-at-least-32-characters',
+        REFRESH_TOKEN_SECRET:
+          'replace-with-a-different-random-secret-of-at-least-32-characters',
+      }),
+    ).toThrow(/placeholder values/);
+
+    expect(() =>
+      loadAuthConfiguration({
         JWT_SECRET: 'same-secret-that-is-long-enough-to-pass-validation',
-        REFRESH_TOKEN_SECRET: 'same-secret-that-is-long-enough-to-pass-validation',
+        REFRESH_TOKEN_SECRET:
+          'same-secret-that-is-long-enough-to-pass-validation',
       }),
     ).toThrow(/must be different/);
   });

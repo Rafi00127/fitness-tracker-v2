@@ -46,6 +46,7 @@ The starting design for the application is:
 - production refresh cookies use `Secure`, `HttpOnly`, `SameSite=Lax`, and an auth-only path
 
 The refresh cookie is scoped to `/api/v1/auth`. Clients must send the cookie when calling refresh or logout. Refresh tokens are not returned in JSON responses.
+The web client holds access tokens only in memory, restores its session through the refresh endpoint on load, and clears that in-memory state after a successful logout.
 
 ## 6. Refresh Behavior
 
@@ -126,6 +127,7 @@ The backend is the single source of truth for access decisions.
 ## 14. Phase 2 Session Behavior
 
 - registration and login issue a short-lived access token and set a refresh cookie
+- refresh returns the user identity and a new access token while rotating the cookie
 - refresh atomically revokes the presented token and rotates to a new token
 - logout revokes the presented refresh token and clears the cookie
 - access tokens are not revoked individually; they expire after 15 minutes

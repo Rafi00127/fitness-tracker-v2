@@ -37,6 +37,7 @@ The system will require environment variables for:
 - prevent token leakage via logs or client-side storage mistakes
 - rotate refresh tokens where applicable
 - send browser refresh tokens only in HTTP-only cookies
+- keep access tokens in memory rather than local or session storage
 - store refresh token hashes rather than bearer tokens in the database
 - fail application startup when required token secrets are missing, weak, or identical
 

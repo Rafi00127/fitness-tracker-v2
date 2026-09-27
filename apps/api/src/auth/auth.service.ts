@@ -151,7 +151,14 @@ export class AuthService {
         throw new UnauthorizedException('Invalid refresh token');
       }
 
-      return this.issueTokens(user.id, transaction);
+      return {
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+        },
+        ...(await this.issueTokens(user.id, transaction)),
+      };
     });
   }
 

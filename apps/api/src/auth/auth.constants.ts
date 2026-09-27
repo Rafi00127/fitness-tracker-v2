@@ -14,7 +14,10 @@ export function loadAuthConfiguration(
   const accessTokenSecret = environment.JWT_SECRET;
   const refreshTokenSecret = environment.REFRESH_TOKEN_SECRET;
 
-  if (!isStrongSecret(accessTokenSecret) || !isStrongSecret(refreshTokenSecret)) {
+  if (
+    !isStrongSecret(accessTokenSecret) ||
+    !isStrongSecret(refreshTokenSecret)
+  ) {
     throw new Error(
       'JWT_SECRET and REFRESH_TOKEN_SECRET must each contain at least 32 UTF-8 bytes and must not use placeholder values.',
     );
@@ -31,7 +34,7 @@ function isStrongSecret(secret: string | undefined): secret is string {
   return (
     secret !== undefined &&
     Buffer.byteLength(secret, 'utf8') >= 32 &&
-    !/(replace[-_ ]?me|change[-_ ]?me|example|your[-_ ]|placeholder)/i.test(
+    !/(replace[-_ ]?(me|with)|change[-_ ]?me|example|your[-_ ]|placeholder)/i.test(
       secret,
     )
   );

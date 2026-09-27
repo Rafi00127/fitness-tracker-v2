@@ -3,13 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppController } from '../src/app.controller';
 import { AppService } from '../src/app.service';
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-} from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it } from '@jest/globals';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
@@ -29,9 +23,7 @@ describe('AppController (e2e)', () => {
   });
 
   it('/api/v1 (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/api/v1')
-      .expect(404);
+    return request(app.getHttpServer()).get('/api/v1').expect(404);
   });
 
   it('exposes the default app message', () => {

@@ -79,6 +79,9 @@ Authentication requirements:
 - refresh rotates refresh tokens securely
 - refresh and logout use the `refresh_token` cookie scoped to `/api/v1/auth`
 - logout invalidates the presented refresh token and clears the cookie
+- logout is idempotent and can be called without an access token; a presented refresh cookie is revoked before being cleared
+- refresh returns the authenticated user and new access token while rotating the cookie
+- browser credentialed requests are allowed only from `NEXT_PUBLIC_APP_URL`
 
 Authentication success responses use the documented `data` and `meta` envelope. The refresh endpoint does not accept a refresh token in its JSON body.
 

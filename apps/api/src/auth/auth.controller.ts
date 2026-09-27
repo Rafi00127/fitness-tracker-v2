@@ -73,10 +73,22 @@ export class AuthController {
       throw new UnauthorizedException('Invalid refresh token');
     }
 
-    const result = await this.authService.refresh(refreshToken);
+    let result: Awaited<ReturnType<AuthService['refresh']>>;
+    try {
+      result = await this.authService.refresh(refreshToken);
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        this.clearRefreshCookie(response);
+      }
+      throw error;
+    }
+
     this.setRefreshCookie(response, result.refreshToken);
 
-    return this.successResponse({ accessToken: result.accessToken });
+    return this.successResponse({
+      user: result.user,
+      accessToken: result.accessToken,
+    });
   }
 
   private setRefreshCookie(response: Response, refreshToken: string): void {

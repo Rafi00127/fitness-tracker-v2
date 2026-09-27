@@ -89,6 +89,14 @@ Key documents:
 5. Update affected documentation if requirements or implementation details change.
 6. Report progress clearly and note open decisions.
 
+## Current Implementation Status
+
+Phase 2 authentication includes email registration and login, short-lived access tokens, HTTP-only refresh cookies, refresh-token rotation and revocation, logout, and client-side login/register screens. Profile, dashboard, workouts, and other tracking features remain later roadmap phases and are not implemented here.
+
+To run the API locally, copy `.env.example` to `.env`, replace both auth-secret placeholders with different random values of at least 32 UTF-8 bytes, start PostgreSQL with Docker Compose, and apply the Prisma migration from `apps/api` using `npx prisma migrate deploy`. Run the web and API apps with `npm run dev:web` and `npm run dev:api`.
+
+The auth screens use `NEXT_PUBLIC_API_URL` for their API requests and `NEXT_PUBLIC_APP_URL` as the API's credentialed CORS origin. Browser tests mock the auth endpoints and do not require PostgreSQL.
+
 ## Environment Setup
 
 The project should use environment variables for configuration and secrets. The exact values are not committed to version control.

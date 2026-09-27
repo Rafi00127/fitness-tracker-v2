@@ -2,10 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { createHash } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
-import {
-  AUTH_CONFIGURATION,
-  AuthConfiguration,
-} from './auth.constants';
+import { AUTH_CONFIGURATION, AuthConfiguration } from './auth.constants';
 import { AuthService } from './auth.service';
 
 describe('AuthService', () => {
@@ -161,7 +158,9 @@ describe('AuthService', () => {
     });
     transactionMock.refreshToken.updateMany.mockResolvedValue({ count: 0 });
 
-    await expect(service.refresh('replayed-refresh-token')).rejects.toMatchObject({
+    await expect(
+      service.refresh('replayed-refresh-token'),
+    ).rejects.toMatchObject({
       status: 401,
     });
     expect(transactionMock.refreshToken.create).not.toHaveBeenCalled();
