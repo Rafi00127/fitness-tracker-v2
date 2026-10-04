@@ -68,14 +68,9 @@ async function requestAuth(
   endpoint: "register" | "login" | "refresh" | "logout",
   input?: { email: string; password: string; name?: string },
 ): Promise<unknown> {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  if (!apiUrl) {
-    throw new Error("NEXT_PUBLIC_API_URL is not configured.");
-  }
-
-  const response = await fetch(
-    `${apiUrl.replace(/\/+$/, "")}/api/v1/auth/${endpoint}`,
-    {
+  let response: Response;
+  try {
+    response = await fetch(`/api/v1/auth/${endpoint}`, {
       method: "POST",
       credentials: "include",
       ...(input
@@ -84,8 +79,22 @@ async function requestAuth(
             body: JSON.stringify(input),
           }
         : {}),
-    },
+    });
+  } catch {
+    throw new Error(
+      "Cannot reach the authentication service. Start the API and database, then try again.",
+    );
+  }
+
+  if (!response.headers.get("content-type")?.includes("application/json")) {
+    if (response.status >= 500) {
+      throw new Error(
+        "The authentication service is unavailable. Start the API and database, then try again.",
       );
+    }
+
+    throw new Error("The authentication service returned an invalid response.");
+  }
 
   let payload: unknown;
   try {
