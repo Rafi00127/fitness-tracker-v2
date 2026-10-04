@@ -1,62 +1,41 @@
 # Docker
 
-## 1. Purpose
+## Local containerized stack
 
-Docker and Docker Compose support local infrastructure, consistent development setup, and service isolation for PostgreSQL and related local dependencies. The project uses Docker as part of the developer workflow and local environment consistency.
+Docker Compose runs PostgreSQL, a one-shot Prisma migration job, the NestJS API, and the Next.js web application. PostgreSQL data is kept in the named `pgdata` volume.
 
-## 2. Local PostgreSQL
+From the repository root:
 
-The project should include a PostgreSQL service for local development. This enables the Prisma schema and app code to run against a realistic database environment without relying on a host-only installation.
+1. Copy `.env.example` to `.env`:
 
-Recommended local service responsibilities:
+   ```powershell
+   Copy-Item .env.example .env
+   ```
 
-- PostgreSQL instance
-- named volume for persistent local data
-- network connectivity from the API to the database
-- health checks for startup readiness
+2. Replace `JWT_SECRET` and `REFRESH_TOKEN_SECRET` with different random values of at least 32 UTF-8 bytes. In PowerShell:
 
-## 3. Application Containers
+   ```powershell
+   $rng = [Security.Cryptography.RandomNumberGenerator]::Create()
+   $jwtBytes = New-Object byte[] 48
+   $refreshBytes = New-Object byte[] 48
+   $rng.GetBytes($jwtBytes)
+   $rng.GetBytes($refreshBytes)
+   [Convert]::ToBase64String($jwtBytes)
+   [Convert]::ToBase64String($refreshBytes)
+   ```
 
-Application containerization is optional for MVP but may be used for local orchestration or a future production-ready deployment pattern. If containers are added, they should remain predictable and aligned with the repository architecture.
+   Put those generated values in `.env`; do not commit that file.
 
-## 4. Docker Compose
+3. Build and start the services:
 
-Docker Compose should be used to coordinate local services, especially when the project needs multiple containers such as:
+   ```powershell
+   docker compose --parallel 1 up --build -d
+   ```
 
-- PostgreSQL database
-- API service
-- web application service
+4. Wait for `docker compose ps` to report the API and web services as healthy. The migration service applies Prisma migrations before the API starts. Open [http://localhost:3000](http://localhost:3000); the API is published at `http://localhost:3001`.
 
-This should remain minimal and not introduce unnecessary complexity for the initial setup.
+The browser sends requests to same-origin `/api/v1` paths. Next.js forwards them to the API container using the build-time `API_INTERNAL_URL=http://api:3001`, so the browser does not need Docker service DNS or a hard-coded API host.
 
-## 5. Networks and Volumes
+Docker Desktop must be running. Check service status with `docker compose ps`; inspect logs with `docker compose logs -f web api migrate postgres`. Stop services with `docker compose down`, which preserves the database volume. `docker compose down -v` deletes local database data and should only be used if that data can be discarded.
 
-- use a dedicated private network for local services
-- mount a named volume for PostgreSQL data persistence
-- keep volumes predictable and documented
-
-## 6. Health Checks
-
-Local services should include health checks when practical so the application can wait for PostgreSQL or dependent services to become ready.
-
-## 7. Development Workflow
-
-The intended local workflow is:
-
-1. start Docker services
-2. run Prisma migrations
-3. start the API and web app
-4. run tests and verify local behavior
-
-## 8. Production Considerations
-
-Production deployment is not the same as local Docker orchestration. Production concerns include:
-
-- secret management
-- database persistence and backup strategy
-- environment-specific configuration
-- the security boundary for running services
-
-## 9. Current Assumptions
-
-The exact Docker file structure and service composition will be finalized when the project is scaffolded. This document records the minimal expected purpose and local infrastructure direction without forcing an elaborate container architecture too early.
+This Compose stack is for local development, not production deployment. Production requires managed secrets, TLS, backups, and deployment-specific operational configuration.

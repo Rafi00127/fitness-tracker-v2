@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "fitness-tracker-v2",
   "private": true,
   "workspaces": [
@@ -13,7 +13,7 @@
     "lint:api": "npm --prefix apps/api run lint",
     "typecheck:web": "npm --prefix apps/web run typecheck",
     "typecheck:api": "npm --prefix apps/api run typecheck",
-    "test:web": "npm --prefix apps/web run test -- --runInBand",
+    "test:web": "npm --prefix apps/web run test",
     "test:api": "npm --prefix apps/api run test -- --runInBand",
     "db:generate": "npm --prefix apps/api run db:generate",
     "build": "npm run build:web && npm run build:api",

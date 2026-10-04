@@ -134,6 +134,28 @@ test("reports duplicate email errors", async ({ page }) => {
   ).toBeVisible();
 });
 
+test("explains when the API proxy is unavailable", async ({ page }) => {
+  await page.route("**/api/v1/auth/login", async (route) => {
+    await route.fulfill({
+      status: 500,
+      contentType: "text/html",
+      body: "Internal Server Error",
+    });
+  });
+
+  await page.goto("/login");
+  await page.getByLabel("Email").fill("member@example.com");
+  await page.getByLabel("Password").fill("valid-password");
+  await page.getByRole("button", { name: "Sign in" }).click();
+
+  await expect(
+    page.getByText(
+      "The authentication service is unavailable. Start the API and database, then try again.",
+      { exact: true },
+    ),
+  ).toBeVisible();
+});
+
 test("restores a session from the refresh cookie and signs out", async ({
   page,
 }) => {
