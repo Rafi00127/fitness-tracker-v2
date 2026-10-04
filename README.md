@@ -93,7 +93,7 @@ Key documents:
 
 Phase 2 authentication includes email registration and login, short-lived access tokens, HTTP-only refresh cookies, refresh-token rotation and revocation, logout, and client-side login/register screens. Profile, dashboard, workouts, and other tracking features remain later roadmap phases and are not implemented here.
 
-For the complete containerized local stack, follow [the Docker guide](./docs/14-docker.md). It starts PostgreSQL, applies Prisma migrations, and runs the API and web applications. Browse to `http://localhost:3000`; the API is also available at `http://localhost:3001`.
+To run the API locally, copy `.env.example` to `.env`, replace both auth-secret placeholders with different random values of at least 32 UTF-8 bytes, start PostgreSQL with Docker Compose, and apply the Prisma migration from `apps/api` using `npx prisma migrate deploy`. Run the web and API apps with `npm run dev:web` and `npm run dev:api`.
 
 For separate local development, run PostgreSQL, configure `.env` from `.env.example`, and start the web and API with `npm run dev:web` and `npm run dev:api`. The browser calls same-origin `/api/v1` routes, which Next.js proxies to the API using `API_INTERNAL_URL` (defaults to `http://localhost:3001`). Browser tests mock the auth endpoints and do not require PostgreSQL.
 
