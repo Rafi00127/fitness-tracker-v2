@@ -40,18 +40,22 @@ Rules:
 
 ### Profile
 
-Purpose: keeps user profile metadata and public/private personal settings.
+Purpose: keeps the signed-in user's basic profile metadata and tracking preference.
+
+Phase 3 implementation:
+
+- `userId` is the primary key and a cascading foreign key to `User`, enforcing one profile per user.
+- `heightCm` is nullable `DECIMAL(5,2)`.
+- `weightUnit` is the `KG` / `LB` enum and defaults to `KG`.
+- `createdAt` and `updatedAt` are maintained by the database/Prisma model.
+- The display name is stored as nullable `User.name`, not duplicated in `Profile`.
+- The profile migration backfills a profile row for every existing user.
 
 Likely fields:
 
-- id
 - userId
-- displayName
-- dateOfBirth (optional)
 - heightCm (optional)
 - weightUnit / preferred metrics settings
-- bio (optional)
-- avatarUrl (optional)
 - createdAt
 - updatedAt
 
@@ -59,6 +63,7 @@ Rules:
 
 - one profile per user
 - profile belongs to the user who owns it
+- Phase 3 does not persist date of birth, bio, avatar, or other unrequested details.
 
 ### Exercise
 
@@ -333,4 +338,4 @@ Use Prisma conventions consistent with the project’s direction:
 
 This database design is intentionally conservative. It supports the core fitness-tracking MVP and keeps optional social or AI features out of the schema until they are required.
 
-Because there is no implementation yet, the exact Prisma schema details should be finalized during the first actual schema creation phase rather than imagined in advance.
+Later conceptual entities in this document are not implemented by Phase 3. The current Prisma schema contains `User`, `RefreshToken`, and `Profile`; workout, water, measurement, goal, nutrition, and plan models remain future phase work.

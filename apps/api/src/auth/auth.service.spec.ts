@@ -21,6 +21,7 @@ describe('AuthService', () => {
   let service: AuthService;
   let transactionMock: {
     user: { create: jest.Mock; findUnique: jest.Mock };
+    profile: { create: jest.Mock };
     refreshToken: {
       create: jest.Mock;
       findUnique: jest.Mock;
@@ -48,6 +49,9 @@ describe('AuthService', () => {
           createdAt: user.createdAt,
         }),
         findUnique: jest.fn().mockResolvedValue(user),
+      },
+      profile: {
+        create: jest.fn().mockResolvedValue(undefined),
       },
       refreshToken: {
         create: jest.fn().mockResolvedValue(undefined),
@@ -102,6 +106,9 @@ describe('AuthService', () => {
         data: expect.objectContaining({ email: 'user@example.com' }),
       }),
     );
+    expect(transactionMock.profile.create).toHaveBeenCalledWith({
+      data: { userId: user.id },
+    });
     expect(result.refreshToken).toBe('refresh-token');
     expect(transactionMock.refreshToken.create).toHaveBeenCalledWith({
       data: expect.objectContaining({

@@ -23,6 +23,7 @@ export interface AuthSession {
 
 interface AuthSessionContextValue {
   session: AuthSession | null;
+  isLoading: boolean;
   setSession: (session: AuthSession) => void;
   signOut: () => Promise<void>;
 }
@@ -31,10 +32,12 @@ const AuthSessionContext = createContext<AuthSessionContextValue | null>(null);
 
 export function AuthSessionProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<AuthSession | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [initializationError, setInitializationError] = useState("");
   const updateSession = useCallback((newSession: AuthSession) => {
     setSession(newSession);
     setInitializationError("");
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
@@ -46,15 +49,15 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
         }
       })
       .catch((cause: unknown) => {
-        if (
-          isMounted &&
-          !(cause instanceof AuthApiError && cause.status === 401)
-        ) {
-          setInitializationError(
-            cause instanceof Error
-              ? cause.message
-              : "Unable to restore your session.",
-          );
+        if (isMounted) {
+          if (!(cause instanceof AuthApiError && cause.status === 401)) {
+            setInitializationError(
+              cause instanceof Error
+                ? cause.message
+                : "Unable to restore your session.",
+            );
+          }
+          setIsLoading(false);
         }
       });
 
@@ -69,8 +72,8 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ session, setSession: updateSession, signOut }),
-    [session, updateSession, signOut],
+    () => ({ session, isLoading, setSession: updateSession, signOut }),
+    [session, isLoading, updateSession, signOut],
   );
 
   return (

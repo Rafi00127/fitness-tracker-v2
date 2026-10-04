@@ -87,3 +87,12 @@
 - [ ] roadmap phases remain correctly staged
 - [ ] future social and AI features are clearly out of MVP scope
 - [ ] project is ready for the next implementation phase
+
+## 14. Phase 3 — Profile / Dashboard
+
+- [x] authenticated profile read/update contract is implemented
+- [x] profile migration backfills existing users
+- [x] dashboard and profile shell use the authenticated session
+- [x] future tracking cards are explicitly unavailable and do not fabricate data
+- [x] API and browser tests cover the Phase 3 flows
+- [x] validate/apply migration against PostgreSQL and verify the integrated Docker stack

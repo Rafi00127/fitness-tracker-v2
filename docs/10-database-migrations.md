@@ -28,6 +28,8 @@ Each migration should be checked for:
 
 The Phase 2 refresh-token migration hashes existing stored tokens and revokes those sessions so plaintext credentials are not retained. Users with pre-migration refresh tokens must sign in again.
 
+The Phase 3 profile migration creates a one-to-one `Profile` table with a cascading foreign key to `User`, then backfills one default profile row for every existing user. It does not delete or rewrite account data. New registrations create their profile in the same transaction as the user.
+
 ## 4. Production Safety
 
 Production migrations must be treated carefully. Before applying a migration to a production environment, the team should confirm:

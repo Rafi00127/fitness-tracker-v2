@@ -115,3 +115,5 @@ Examples:
 The project treats health and fitness records as sensitive personal data. Social and AI features remain future scope and should not be implemented until the organization has reviewed the privacy and security implications of those features.
 
 The Phase 2 refresh cookie is `SameSite=Lax`, scoped to `/api/v1/auth`, and marked `Secure` in production. Access tokens are short-lived (15 minutes) and are sent using the Authorization bearer scheme.
+
+Phase 3 profile and dashboard handlers require the access-token guard and derive ownership from its verified subject. Profile update DTOs validate name, height, and weight-unit values; user IDs are not accepted from the browser for these operations.

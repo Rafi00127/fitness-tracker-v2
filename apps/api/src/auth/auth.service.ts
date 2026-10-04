@@ -52,6 +52,10 @@ export class AuthService {
           },
         });
 
+        await transaction.profile.create({
+          data: { userId: user.id },
+        });
+
         const tokens = await this.issueTokens(user.id, transaction);
         return { user, ...tokens };
       });

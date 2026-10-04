@@ -91,11 +91,11 @@ Key documents:
 
 ## Current Implementation Status
 
-Phase 2 authentication includes email registration and login, short-lived access tokens, HTTP-only refresh cookies, refresh-token rotation and revocation, logout, and client-side login/register screens. Profile, dashboard, workouts, and other tracking features remain later roadmap phases and are not implemented here.
+Phase 3 adds authenticated profile editing (display name, optional height, and preferred weight unit) and a dashboard shell. Workout, water, measurement, and goal areas are explicitly marked as unavailable until their later roadmap phases; no tracking data is created in Phase 3.
 
 To run the API locally, copy `.env.example` to `.env`, replace both auth-secret placeholders with different random values of at least 32 UTF-8 bytes, start PostgreSQL with Docker Compose, and apply the Prisma migration from `apps/api` using `npx prisma migrate deploy`. Run the web and API apps with `npm run dev:web` and `npm run dev:api`.
 
-For separate local development, run PostgreSQL, configure `.env` from `.env.example`, and start the web and API with `npm run dev:web` and `npm run dev:api`. The browser calls same-origin `/api/v1` routes, which Next.js proxies to the API using `API_INTERNAL_URL` (defaults to `http://localhost:3001`). Browser tests mock the auth endpoints and do not require PostgreSQL.
+For separate local development, run PostgreSQL, configure `.env` from `.env.example`, and start the web and API with `npm run dev:web` and `npm run dev:api`. The browser calls same-origin `/api/v1` routes, which Next.js proxies to the API using `API_INTERNAL_URL` (defaults to `http://localhost:3001`). API tests mock persistence and browser tests mock API responses; neither requires PostgreSQL. Applying the Phase 3 profile migration does require a PostgreSQL database.
 
 ## Environment Setup
 
@@ -166,8 +166,8 @@ This project documentation uses a conservative approach when details are not yet
 
 ## Validation Status
 
-The repo has completed the documentation-first phase and a valid Phase 1 setup baseline. The project includes the required stack scaffolding for the web app, API app, environment template, Docker service definition, Prisma schema placeholder, and the root workspace scripts needed for local validation.
+Phase 1 setup, Phase 2 authentication, and Phase 3 profile/dashboard are implemented. The profile migration has been applied to the local PostgreSQL database, and the local Docker Compose web, API, and database services are healthy.
 
 ## Recommended Next Task
 
-The next logical task is to continue with the actual product implementation in Phase 2 only after the Phase 1 foundation is stable in CI/local validation and the database service is running with a real Prisma migration flow.
+The next roadmap phase is Phase 4 — Workouts / Exercises. It remains separate from the completed Phase 3 dashboard shell and should only begin when requested.

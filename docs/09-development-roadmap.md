@@ -74,12 +74,14 @@ Dependencies:
 - authentication
 
 Acceptance criteria:
-- authenticated users can view and edit profile information
-- dashboard shows key recent data and progress summary
+- authenticated users can view and edit the display name, optional height, and preferred weight unit
+- dashboard shows account/profile setup information
+- tracking areas remain explicitly unavailable until their planned phases; no future-phase records are fabricated
+- existing users receive a profile row through a reviewed migration
 
 Validation:
-- API tests for user profile access
-- frontend dashboard verification with Playwright
+- API service and endpoint tests for authenticated, owner-scoped profile/dashboard access and validation
+- Playwright verification of profile editing, protected-route redirection, and dashboard empty/future-phase states
 
 Exit gate:
 - profile and dashboard data must be stable and user-owned before deep tracking modules proceed

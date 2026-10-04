@@ -84,6 +84,7 @@ Rules:
 Protected resources include, at minimum:
 
 - profile data
+- dashboard summary data
 - workouts and exercises
 - water logs
 - measurement history
@@ -132,3 +133,10 @@ The backend is the single source of truth for access decisions.
 - logout revokes the presented refresh token and clears the cookie
 - access tokens are not revoked individually; they expire after 15 minutes
 - existing refresh sessions are revoked when migrating from plaintext-token storage
+
+## 15. Phase 3 Profile and Dashboard Access
+
+- `GET` and `PATCH /api/v1/profiles/me` and `GET /api/v1/dashboard/summary` require a valid access-token bearer header.
+- The profile and dashboard owner is always derived from the verified token subject; the client cannot select another user by submitting an ID.
+- Registration creates the initial profile in the same database transaction as the user.
+- The profile migration backfills existing users before Phase 3 profile reads are served.

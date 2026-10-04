@@ -59,12 +59,14 @@ The refresh token is never exposed to page JavaScript or browser storage. The HT
 
 The dashboard is the main landing screen for authenticated users.
 
-Expected content:
+Phase 3 dashboard content:
 
-- summary cards for recent workouts, water intake, goals, and measurements
-- activity timeline or recent entries list
-- progress trend indicators
-- quick actions to create a workout, log water, record measurements, and update goals
+- account and profile setup overview
+- profile link
+- tracking-module cards clearly marked unavailable until their planned roadmap phase
+- a recent-activity empty state
+
+Workout, water, measurement, and goal values, trends, or quick actions must not imply those later-phase features already exist.
 
 Design considerations:
 
@@ -74,12 +76,14 @@ Design considerations:
 
 ## 5. Profile
 
-Profile pages should allow:
+Phase 3 profile page allows:
 
-- viewing basic account and personal details
-- updating name and preferences
-- accessing profile settings
-- editing personal metrics relevant to tracking
+- viewing the account email (read-only)
+- updating the display name
+- updating optional height in centimeters
+- selecting the preferred weight unit (kg or lb)
+
+Date of birth, biography, avatar, and broader settings are not part of the implemented profile contract.
 
 ## 6. Workouts and Exercises
 

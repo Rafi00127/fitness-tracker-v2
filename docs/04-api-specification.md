@@ -85,21 +85,33 @@ Authentication requirements:
 
 Authentication success responses use the documented `data` and `meta` envelope. The refresh endpoint does not accept a refresh token in its JSON body.
 
-## 6. User and Profile Endpoints
+## 6. Profile and Dashboard Endpoints
 
-Likely endpoints:
+Implemented Phase 3 endpoints:
 
-- `GET /api/v1/users/me`
-- `PATCH /api/v1/users/me`
-- `GET /api/v1/profiles/me`
-- `PATCH /api/v1/profiles/me`
+- `GET /api/v1/profiles/me` — returns the authenticated account and profile.
+- `PATCH /api/v1/profiles/me` — updates the display name, optional height, and weight-unit preference.
+- `GET /api/v1/dashboard/summary` — returns the authenticated account/profile overview, an empty recent-activity list, and explicit future-phase availability for tracking modules.
 
-Requirements:
+All three endpoints require a valid access-token bearer header. Ownership is derived from the verified token subject; these routes accept no user ID from the client.
 
-- only the authenticated user can access their own profile
-- any user ID in the request must be validated and authorized server-side
+Profile update fields are optional:
 
-## 7. Workout and Exercise Endpoints
+```json
+{
+  "name": "Member",
+  "heightCm": 172.5,
+  "weightUnit": "KG"
+}
+```
+
+`name` may be `null` or an empty/whitespace string to clear it. `heightCm` may be `null` to clear it and otherwise must be between 30 and 300 cm. `weightUnit` is `KG` or `LB`. Unrecognized fields are rejected.
+
+The dashboard currently reports `workouts` for Phase 4, `water` and `measurements` for Phase 5, and `goals` for Phase 6 as unavailable. No future tracking data is fabricated. Profile and dashboard payloads use the standard `data` / `meta` success envelope.
+
+For this phase, `profileComplete` means the user has a nonblank display name and a height value. The preferred weight unit has a default and is not required for completion.
+
+## 7. Future Workout and Exercise Endpoints
 
 Likely endpoints:
 
@@ -117,7 +129,7 @@ Requirements:
 - a workout may include multiple exercise entries
 - response payloads should include relevant nested data only when required
 
-## 8. Water and Measurements Endpoints
+## 8. Future Water and Measurements Endpoints
 
 Likely endpoints:
 
@@ -131,7 +143,7 @@ Requirements:
 - logs are user-specific
 - date-based queries and charts should be supported through filtering
 
-## 9. Goals, Nutrition, and Plans Endpoints
+## 9. Future Goals, Nutrition, and Plans Endpoints
 
 Likely endpoints:
 
@@ -204,4 +216,4 @@ The project intends to document the API explicitly as implementation begins. Dur
 
 ## 16. Current Assumptions
 
-This specification documents the likely API surface only where a requirement already exists. Additional endpoints and payload shapes should be added only when there is a real requirement and a matching design decision.
+Future endpoints above describe planned domain direction; they are not implemented Phase 3 routes. Add additional endpoint contracts only when the matching roadmap phase is approved.

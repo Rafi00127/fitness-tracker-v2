@@ -107,4 +107,6 @@ Before feature completion and before merging changes, the project should run the
 
 ## 8. Current Test Assumptions
 
-Phase 2 includes unit tests for password/token handling and authorization guards, API E2E tests for registration, login, refresh, logout, and validation, and Playwright tests for the browser authentication screens. API route tests mock persistence; browser tests intercept the API. Neither suite requires a running PostgreSQL instance. The Prisma migration still requires PostgreSQL to validate and apply.
+Phase 3 adds API service tests for profile ownership-scoped lookups/updates and dashboard summary behavior, plus API endpoint tests for authentication, validation, and authenticated user scoping. Playwright covers signed-out dashboard redirection, dashboard empty/future-phase states, and profile editing. The API tests mock persistence and browser tests intercept the API; neither requires a running PostgreSQL instance. Prisma schema validation does not require a live database, but applying the profile backfill migration requires PostgreSQL.
+
+The Phase 3 migration and live service flow were also smoke-tested against the local Docker Compose PostgreSQL/API stack using a temporary account that was removed after verification.
