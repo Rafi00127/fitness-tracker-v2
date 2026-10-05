@@ -17,6 +17,8 @@ import { WaterController } from '../src/water/water.controller';
 import { WaterService } from '../src/water/water.service';
 import { MeasurementsController } from '../src/measurements/measurements.controller';
 import { MeasurementsService } from '../src/measurements/measurements.service';
+import { GoalsController } from '../src/goals/goals.controller';
+import { GoalsService } from '../src/goals/goals.service';
 
 const accessTokenSecret = 'phase-three-test-access-secret-at-least-32';
 const authConfiguration = {
@@ -62,6 +64,14 @@ describe('Profile and dashboard endpoints', () => {
     updateForUser: jest.fn(),
     deleteForUser: jest.fn(),
   };
+  const goalsService = {
+    listForUser: jest.fn(),
+    createForUser: jest.fn(),
+    getForUser: jest.fn(),
+    updateForUser: jest.fn(),
+    deleteForUser: jest.fn(),
+    progressForUser: jest.fn(),
+  };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -74,6 +84,7 @@ describe('Profile and dashboard endpoints', () => {
         WorkoutsController,
         WaterController,
         MeasurementsController,
+        GoalsController,
       ],
       providers: [
         JwtAuthGuard,
@@ -84,6 +95,7 @@ describe('Profile and dashboard endpoints', () => {
         { provide: WorkoutsService, useValue: workoutsService },
         { provide: WaterService, useValue: waterService },
         { provide: MeasurementsService, useValue: measurementsService },
+        { provide: GoalsService, useValue: goalsService },
       ],
     }).compile();
 
@@ -121,6 +133,10 @@ describe('Profile and dashboard endpoints', () => {
     await request(app.getHttpServer()).get('/api/v1/workouts').expect(401);
     await request(app.getHttpServer()).get('/api/v1/water').expect(401);
     await request(app.getHttpServer()).get('/api/v1/measurements').expect(401);
+    await request(app.getHttpServer()).get('/api/v1/goals').expect(401);
+    await request(app.getHttpServer())
+      .get('/api/v1/goals/progress?from=2026-10-01&to=2026-10-05')
+      .expect(401);
   });
 
   it('uses the authenticated subject as the profile owner', async () => {
@@ -317,5 +333,72 @@ describe('Profile and dashboard endpoints', () => {
       .expect(400);
 
     expect(measurementsService.createForUser).not.toHaveBeenCalled();
+  });
+
+  it('derives goal ownership from the authenticated subject', async () => {
+    goalsService.createForUser.mockResolvedValue({
+      id: 'goal-1',
+      metric: 'DAILY_WATER_ML',
+      targetValue: 2000,
+    });
+    const token = await accessToken();
+    const response = await request(app.getHttpServer())
+      .post('/api/v1/goals')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        title: 'Drink enough water',
+        metric: 'DAILY_WATER_ML',
+        targetValue: 2000,
+        targetDate: '2026-10-31',
+      })
+      .expect(201);
+
+    expect(goalsService.createForUser).toHaveBeenCalledWith(
+      'owner-1',
+      expect.objectContaining({
+        metric: 'DAILY_WATER_ML',
+        targetValue: 2000,
+      }),
+    );
+    expect(response.body.data.id).toBe('goal-1');
+  });
+
+  it('rejects unsupported goal metrics and client-supplied progress', async () => {
+    const token = await accessToken();
+    await request(app.getHttpServer())
+      .post('/api/v1/goals')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        title: 'Unsupported goal',
+        metric: 'CALORIES',
+        targetValue: 100,
+        currentValue: 10,
+      })
+      .expect(400);
+
+    expect(goalsService.createForUser).not.toHaveBeenCalled();
+  });
+
+  it('passes the authenticated owner to chart history', async () => {
+    goalsService.progressForUser.mockResolvedValue({
+      water: [],
+      workouts: [],
+      weight: [],
+    });
+    const token = await accessToken();
+    const response = await request(app.getHttpServer())
+      .get('/api/v1/goals/progress?from=2026-10-01&to=2026-10-05')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+
+    expect(goalsService.progressForUser).toHaveBeenCalledWith(
+      'owner-1',
+      expect.objectContaining({ from: '2026-10-01', to: '2026-10-05' }),
+    );
+    expect(response.body.data).toEqual({
+      water: [],
+      workouts: [],
+      weight: [],
+    });
   });
 });

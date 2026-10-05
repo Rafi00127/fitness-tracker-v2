@@ -114,7 +114,19 @@
 - [x] implement authenticated, validated water and measurement APIs
 - [x] support date filters and water intake totals without adding goal targets
 - [x] build water history/edit and measurement history/comparison screens
-- [x] update dashboard availability while keeping goals, charts, and later phases unavailable
+- [x] update dashboard availability for Phase 5 while keeping goals unavailable until Phase 6
 - [x] add service, endpoint, and Playwright coverage
 - [x] update API, database, UI, security, testing, migration, and roadmap documentation
 - [x] apply migration to PostgreSQL and smoke-test the integrated application
+
+## 17. Phase 6 — Goals / Charts
+
+- [x] add owner-scoped Goal model and additive Prisma migration
+- [x] implement authenticated goal CRUD and derived progress for daily water,
+      weekly workouts, and target body weight
+- [x] implement date-range water, workout, and weight history API
+- [x] build goal management, progress charts, and dashboard summary
+- [x] add service, API ownership/validation, and Playwright coverage
+- [x] update related product, database, API, UI, security, testing, migration,
+      and roadmap documentation
+- [x] apply migration to local PostgreSQL and validate the integrated stack

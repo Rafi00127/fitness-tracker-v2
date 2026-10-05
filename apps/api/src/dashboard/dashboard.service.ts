@@ -58,7 +58,7 @@ export class DashboardService {
         { key: 'workouts', available: true, plannedPhase: 4 },
         { key: 'water', available: true, plannedPhase: 5 },
         { key: 'measurements', available: true, plannedPhase: 5 },
-        { key: 'goals', available: false, plannedPhase: 6 },
+        { key: 'goals', available: true, plannedPhase: 6 },
       ],
     };
   }

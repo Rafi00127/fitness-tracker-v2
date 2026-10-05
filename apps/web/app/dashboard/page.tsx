@@ -2,7 +2,12 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getDashboardSummary, type DashboardSummary } from "@/lib/fitness-api";
+import {
+  getDashboardSummary,
+  getGoals,
+  type DashboardSummary,
+  type GoalRecord,
+} from "@/lib/fitness-api";
 import { useAuthSession } from "../auth-session";
 import { ProtectedAppShell } from "../protected-app-shell";
 
@@ -19,7 +24,10 @@ const moduleNames: Record<
 export default function DashboardPage() {
   const { session } = useAuthSession();
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
+  const [goals, setGoals] = useState<GoalRecord[]>([]);
+  const [goalsLoading, setGoalsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [goalsError, setGoalsError] = useState("");
 
   useEffect(() => {
     if (!session) {
@@ -44,6 +52,31 @@ export default function DashboardPage() {
         }
       });
 
+    return () => {
+      isMounted = false;
+    };
+  }, [session]);
+
+  useEffect(() => {
+    if (!session) return;
+    let isMounted = true;
+    getGoals(session, { limit: 3 })
+      .then((result) => {
+        if (isMounted) {
+          setGoals(result.items);
+          setGoalsError("");
+        }
+      })
+      .catch((cause: unknown) => {
+        if (isMounted) {
+          setGoalsError(
+            cause instanceof Error ? cause.message : "Unable to load goals.",
+          );
+        }
+      })
+      .finally(() => {
+        if (isMounted) setGoalsLoading(false);
+      });
     return () => {
       isMounted = false;
     };
@@ -120,8 +153,7 @@ export default function DashboardPage() {
                 Tracking features
               </h2>
               <p className="mt-1 text-sm text-zinc-600">
-                Workouts, water, and measurements are ready now; goals will
-                follow in a later phase.
+                Your private tracking tools and goal progress.
               </p>
               <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {summary.trackingModules.map((item) => (
@@ -161,9 +193,72 @@ export default function DashboardPage() {
                         View measurements
                       </Link>
                     )}
+                    {item.key === "goals" && item.available && (
+                      <Link
+                        className="mt-3 inline-block text-sm font-medium text-zinc-700 underline underline-offset-4"
+                        href="/goals"
+                      >
+                        View goals
+                      </Link>
+                    )}
                   </article>
                 ))}
               </div>
+            </section>
+
+            <section aria-labelledby="goals-overview-heading" className="mt-10">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2
+                  className="text-xl font-semibold text-zinc-950"
+                  id="goals-overview-heading"
+                >
+                  Goal progress
+                </h2>
+                <Link
+                  className="text-sm font-medium text-zinc-700 underline underline-offset-4"
+                  href="/goals"
+                >
+                  Manage goals
+                </Link>
+              </div>
+              {goalsLoading ? (
+                <p className="mt-4 text-sm text-zinc-600" role="status">
+                  Loading goals...
+                </p>
+              ) : goalsError ? (
+                <p className="mt-4 text-sm text-red-800" role="alert">
+                  {goalsError}
+                </p>
+              ) : goals.length === 0 ? (
+                <p className="mt-4 rounded-xl border border-dashed border-zinc-300 bg-white p-5 text-sm text-zinc-600">
+                  Create a goal to see automatically calculated progress here.
+                </p>
+              ) : (
+                <ul className="mt-4 grid gap-4 sm:grid-cols-2">
+                  {goals.map((goal) => (
+                    <li
+                      className="rounded-xl border border-zinc-200 bg-white p-5"
+                      key={goal.id}
+                    >
+                      <h3 className="font-medium text-zinc-950">{goal.title}</h3>
+                      <p className="mt-1 text-sm text-zinc-600">
+                        {goal.currentValue === null
+                          ? "Record a weight measurement to see progress."
+                          : `${goal.currentValue.toLocaleString()} of ${goal.targetValue.toLocaleString()} · ${goal.status.toLowerCase()}`}
+                      </p>
+                      <label className="sr-only" htmlFor={`dashboard-goal-${goal.id}`}>
+                        {goal.title} progress
+                      </label>
+                      <progress
+                        className="mt-3 h-2 w-full accent-blue-700"
+                        id={`dashboard-goal-${goal.id}`}
+                        max={100}
+                        value={goal.progressPercent ?? 0}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              )}
             </section>
 
             <section aria-labelledby="recent-heading" className="mt-10">

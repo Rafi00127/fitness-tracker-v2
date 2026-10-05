@@ -9,6 +9,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { WorkoutsModule } from './workouts/workouts.module';
 import { MeasurementsModule } from './measurements/measurements.module';
 import { WaterModule } from './water/water.module';
+import { GoalsModule } from './goals/goals.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { WaterModule } from './water/water.module';
     WorkoutsModule,
     WaterModule,
     MeasurementsModule,
+    GoalsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

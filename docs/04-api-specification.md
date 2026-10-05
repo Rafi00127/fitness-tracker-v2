@@ -107,7 +107,10 @@ Profile update fields are optional:
 
 `name` may be `null` or an empty/whitespace string to clear it. `heightCm` may be `null` to clear it and otherwise must be between 30 and 300 cm. `weightUnit` is `KG` or `LB`. Unrecognized fields are rejected.
 
-The dashboard reports workout tracking as available and includes up to five most recent workouts. Water and measurements remain planned for Phase 5, and goals for Phase 6. No future tracking data is fabricated. Profile and dashboard payloads use the standard `data` / `meta` success envelope.
+The dashboard reports workout, water, measurement, and goal tracking as
+available and includes up to five most recent workouts. Goals are available in
+Phase 6. No future tracking data is fabricated. Profile and dashboard payloads
+use the standard `data` / `meta` success envelope.
 
 For this phase, `profileComplete` means the user has a nonblank display name and a height value. The preferred weight unit has a default and is not required for completion.
 
@@ -137,7 +140,7 @@ Workout create fields: `title` (required, 1-120 characters), `date` (ISO-8601 ti
 
 List pagination defaults to `page=1` and `limit=20`; `limit` is capped at 100. `from` and `to` are inclusive ISO-8601 timestamp filters. `q` searches exercise name/category. Responses use the standard success envelope; list responses include `meta.pagination`.
 
-All lookup and mutation ownership derives from the verified token subject. A workout cannot reference another user's exercise. Water and measurements are implemented in Phase 5; goals, nutrition, and plans remain future work.
+All lookup and mutation ownership derives from the verified token subject. A workout cannot reference another user's exercise. Water and measurements are implemented in Phase 5; goals are implemented in Phase 6, while nutrition and plans remain future work.
 
 ## 8. Water and Measurement Endpoints
 
@@ -159,9 +162,43 @@ Measurements:
 
 Measurement bodies accept optional `weightKg`, `waistCm`, `chestCm`, `hipCm`, `bicepsCm`, `bodyFatPercent`, and `notes`; create requires at least one non-null measurement value. Weight uses three decimal places; other values use two, body fat is 0-100, and dimensions/weight must be positive. PATCH may use `null` to clear values, but the resulting record must retain at least one measurement. Multiple snapshots per date are supported. Weight uses kg in the API and storage; the UI converts to/from the profile's preferred unit. Dates are calendar dates, not timestamps.
 
-Lists use the standard `data` / `meta` envelope with pagination. User ownership is derived from the verified access-token subject. No daily water target or progress goal is implied.
+Lists use the standard `data` / `meta` envelope with pagination. User ownership is derived from the verified access-token subject. The Phase 5 water entry API does not itself define daily targets; Phase 6 targets are represented by the separate Goals resource.
 
-## 9. Future Goals, Nutrition, and Plans Endpoints
+## 9. Goals and Progress Endpoints
+
+All goal endpoints require an access-token bearer header:
+
+- `GET /api/v1/goals` — list the authenticated user's goals with current
+  derived progress.
+- `POST /api/v1/goals` — create a goal.
+- `GET /api/v1/goals/:id`, `PATCH /api/v1/goals/:id`, and
+  `DELETE /api/v1/goals/:id` — manage an owned goal.
+- `GET /api/v1/goals/progress?from=YYYY-MM-DD&to=YYYY-MM-DD` — return
+  owner-scoped water, workout, and weight history for charts.
+
+Supported goal metrics:
+
+- `DAILY_WATER_ML`: target is an integer from 1 through 100000 milliliters; current
+  value is today's UTC-date water total, or zero if no entry exists.
+- `WEEKLY_WORKOUTS`: target is an integer from 1 through 7; current value is
+  the workout count for the current UTC Monday-to-Sunday week.
+- `TARGET_WEIGHT_KG`: target is a positive kilogram value up to 9999.99 kg;
+  create requires a
+  prior weight measurement. The latest measurement at creation is retained as
+  the baseline and target direction is inferred from it.
+
+Goal input includes a required title and metric-specific `targetValue`, with
+an optional date-only `targetDate`. Goal metric cannot be changed in PATCH.
+Current value, capped progress percentage, and `ACTIVE`, `COMPLETED`, or
+`OVERDUE` status are derived at read time. A target date is overdue only after
+that calendar date and while the target is unmet. Responses use the standard
+success envelope. Lists include pagination where applicable.
+
+Chart history returns only persisted values in the requested inclusive date
+range, ordered chronologically; absent records are not synthesized as
+zero-valued activity. The range is limited to 365 days.
+
+## 10. Future Nutrition and Plans Endpoints
 
 Likely endpoints:
 
@@ -177,7 +214,7 @@ Requirements:
 - plan entities remain lightweight in MVP
 - nutrition intake tracking may be limited to basic records in the initial phase
 
-## 10. Pagination, Filtering, and Sorting
+## 11. Pagination, Filtering, and Sorting
 
 For list endpoints, the API should support:
 
@@ -194,7 +231,7 @@ Example:
 GET /api/v1/workouts?page=1&limit=20&sort=date&order=desc
 ```
 
-## 11. Validation and Request Rules
+## 12. Validation and Request Rules
 
 - validate required fields and types
 - reject malformed IDs or invalid date strings
@@ -202,7 +239,7 @@ GET /api/v1/workouts?page=1&limit=20&sort=date&order=desc
 - reject overly large payloads when appropriate
 - use consistent DTO validation on the backend
 
-## 12. Authorization Rules
+## 13. Authorization Rules
 
 Every protected route must enforce authorization.
 
@@ -212,7 +249,7 @@ Rules:
 - resource IDs are not trusted as ownership proof
 - frontend hiding of controls is not a substitute for server-side authorization
 
-## 13. Versioning
+## 14. Versioning
 
 The API uses path-based versioning:
 
@@ -222,16 +259,16 @@ The API uses path-based versioning:
 
 This maintains separation from future API changes without affecting the MVP design.
 
-## 14. Idempotency and Safety
+## 15. Idempotency and Safety
 
 - use idempotency keys for sensitive or repeated writes when needed
 - avoid unsafe or ambiguous delete semantics without confirmation
 - treat create operations as explicit and validated actions
 
-## 15. Open API / Contract Plan
+## 16. Open API / Contract Plan
 
 The project intends to document the API explicitly as implementation begins. During the documentation-first phase, the exact OpenAPI or generated contract is not required, but the route conventions and domain resources should remain consistent with the broader product documentation.
 
-## 16. Current Assumptions
+## 17. Current Assumptions
 
-The workout edit child-list replacement rule and exercise-delete conflict behavior are conservative Phase 4 choices, not immutable product requirements. Exercise taxonomy and whether duplicates should be forbidden remain open decisions; categories are free text and names may repeat until specified otherwise. Other future endpoints above are planned direction, not implemented routes; add them only when the matching roadmap phase is approved.
+The workout edit child-list replacement rule and exercise-delete conflict behavior are conservative Phase 4 choices, not immutable product requirements. Exercise taxonomy and whether duplicates should be forbidden remain open decisions; categories are free text and names may repeat until specified otherwise. The Phase 6 goal metric set and UTC progress windows are conservative initial choices; adding metrics or manual progress requires an approved requirement. Future nutrition and plan endpoints above are planned direction, not implemented routes; add them only when the matching roadmap phase is approved.

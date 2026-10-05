@@ -75,6 +75,7 @@ Recommended module boundaries:
 - water
 - measurements
 - goals
+- progress summaries and chart data remain in the relevant domain services
 - nutrition
 - plans
 - scheduling
@@ -160,6 +161,11 @@ The exact endpoint list will be finalized during API specification work and shou
 3. Domain services aggregate, summarize, and format the data.
 4. API responds with structured payloads for charts and cards.
 5. Frontend renders the summary with appropriate loading and empty states.
+
+Phase 6 keeps goal CRUD and progress aggregation in the NestJS modular
+monolith. Goal progress reads only owner-scoped water, workout, and measurement
+records; the browser renders chart data returned by the API and does not
+calculate authoritative progress.
 
 ## 8. Authentication Flow
 

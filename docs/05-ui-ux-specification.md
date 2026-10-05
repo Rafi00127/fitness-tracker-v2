@@ -59,15 +59,14 @@ The refresh token is never exposed to page JavaScript or browser storage. The HT
 
 The dashboard is the main landing screen for authenticated users.
 
-Current dashboard content (Phase 3 shell, extended in Phases 4 and 5):
+Current dashboard content (Phase 3 shell, extended in Phases 4 through 6):
 
 - account and profile setup overview
 - profile link
 - an available workout card and up to five recent workout entries
-- available cards for workouts, water, and measurements, plus goals clearly marked unavailable until Phase 6
+- available cards for workouts, water, measurements, and goals
+- a concise overview of active goals and their current derived progress, with a link to goal management
 - a recent-workout empty state when the user has no workouts
-
-Goal values, progress, or quick actions must not imply that Phase 6 functionality already exists.
 
 Design considerations:
 
@@ -115,20 +114,26 @@ Phase 5 provides one daily total in milliliters, a selectable inclusive date ran
 
 Phase 5 provides date-based snapshots for weight, waist, chest, hip, biceps, and body-fat percentage. Values may be omitted when not applicable; each snapshot needs at least one value. Weight is displayed/input using the profile preference, while storage and API values use kg; other dimensions use cm. Users can review history, compare the latest two snapshots, and create/edit/delete records.
 
-Measurement charts are deferred to Phase 6. The date fields represent user-selected calendar days.
+Measurement history charts are available in Phase 6. The date fields represent user-selected calendar days.
 
 ## 9. Goals
 
-- create a goal with title, value, target date, and status
-- list active goals and completed goals
-- progress indicator for current status
-- empty state and validation handling
+- create, view, edit, and delete a goal for daily water (ml), workouts per
+  calendar week, or target body weight (kg)
+- show current values and progress derived from the user's existing records;
+  users do not enter a separate current value
+- show active, completed, or overdue state derived from the current progress
+  and optional target date
+- target-weight goals require an existing weight measurement and explain that
+  the initial measurement establishes direction/baseline
+- provide empty, loading, validation, and error states
 
 ## 10. Progress and Charts
 
-- simple charting for trends like water, weight, or workout volume
-- key metrics summaries
-- accessible labels and fallbacks
+- simple charts for daily water totals, workout counts, and recorded weight
+- allow an inclusive date range and show only recorded values
+- provide a textual/data-table equivalent and accessible chart labels
+- show empty/loading/error states without fabricating activity
 
 ## 11. Nutrition
 

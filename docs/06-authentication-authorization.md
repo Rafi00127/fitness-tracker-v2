@@ -153,3 +153,11 @@ The backend is the single source of truth for access decisions.
 - Every water and measurement endpoint requires the access-token guard.
 - Reads and writes are scoped to the verified token subject; user IDs are not accepted from clients.
 - Date-range filtering, totals, and record comparisons operate only on that user's records.
+
+## 18. Phase 6 Goals and Progress Access
+
+- Goal CRUD and progress/chart endpoints require the access-token guard.
+- The authenticated token subject is the only owner scope used for goals and
+  their source water, workout, and measurement records.
+- Aggregate and chart queries must never include another user's records.
+- Goal progress is server-derived; client-submitted current values are rejected.

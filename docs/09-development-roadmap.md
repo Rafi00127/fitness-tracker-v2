@@ -151,27 +151,46 @@ Exit gate:
 
 ## 7. Phase 6 — Goals / Charts
 
+Status: implemented and validated against local PostgreSQL and the Docker
+Compose application stack.
+
 Objective:
 - help users set goals and monitor progress visually
 
 Scope:
 - goal creation and status tracking
-- aggregation and charting of progress data
+- automatic progress from daily water, weekly workout, and target-weight records
+- date-range charts for water totals, workout counts, and recorded weight
 - dashboard integration
 
 Dependencies:
+- workouts/exercises
 - water/measurements
 
 Acceptance criteria:
-- users can create goals with target metrics
-- goal progress is visible and tied to tracked data
+- users can create, view, edit, and delete goals for daily water intake,
+  workouts per calendar week, and target body weight
+- current progress and active/completed/overdue state are derived from the
+  authenticated user's existing tracking data
+- target-weight goals require and retain a recorded starting weight
+- charts show actual owner-scoped water, workout, and weight history without
+  fabricating missing records
+- dashboard links to goals and shows a concise progress summary
 
 Validation:
-- goal API tests
-- chart rendering verification in browser tests
+- goal service/API tests cover validation, derived progress, status, and ownership
+- migration is applied to local PostgreSQL without resetting existing data
+- Playwright covers goal management, progress charts, and dashboard summary
+- lint, typecheck, tests, and production builds pass
 
 Exit gate:
 - goal logic must be accurate before nutrition and planning features depend on it
+
+Phase 6 assumptions: water goals compare against the current UTC calendar
+day's total; workout goals compare against the current UTC Monday-to-Sunday
+week; weight direction is inferred from the latest weight measurement when the
+goal is created. Goal dates are optional; status is derived at read time and
+does not persist a manually supplied current value.
 
 ## 8. Phase 7 — Nutrition
 

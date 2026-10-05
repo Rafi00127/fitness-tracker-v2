@@ -166,24 +166,31 @@ Rules:
 
 Purpose: stores target-based personal progress goals.
 
-Likely fields:
+Phase 6 implementation:
 
-- id
-- userId
-- title
-- description
-- category
-- targetValue
-- currentValue
-- targetDate
-- status
-- createdAt
-- updatedAt
+- `id` (cuid primary key), `userId`, `title`, `metric`, `targetValue`,
+  optional date-only `targetDate`, optional `startingWeightKg`, `createdAt`,
+  and `updatedAt`
+- supported metrics are daily water intake (`DAILY_WATER_ML`), workouts per
+  calendar week (`WEEKLY_WORKOUTS`), and target body weight (`TARGET_WEIGHT_KG`)
+- `targetValue` uses `DECIMAL(10,3)`; the selected metric determines its unit
+- `startingWeightKg` is set only for weight goals from the user's latest
+  recorded weight when the goal is created
+- current value, progress percentage, and status are calculated at read time
+  from the relevant owner-scoped tracking records; they are not persisted
+- status is `ACTIVE`, `COMPLETED`, or `OVERDUE`; an omitted target date cannot
+  become overdue
 
 Rules:
 
-- goals belong to one user
-- status should be validated
+- goals belong to one user and are private
+- goal metric cannot be changed after creation
+- a target-weight goal requires a recorded weight baseline and a target
+  different from that baseline; direction is inferred from target vs baseline
+- daily water progress is based on today's UTC calendar date; weekly workout
+  progress is based on the current UTC Monday-to-Sunday calendar week
+- derived values must not be mistaken for user-entered measurements or
+  persisted facts
 
 ### NutritionEntry
 
@@ -329,7 +336,9 @@ Use Prisma conventions consistent with the project’s direction:
 
 ## 12. Phase 4 and Phase 5 Scope and Assumptions
 
-The Phase 4 Prisma schema adds `Exercise`, `Workout`, and `WorkoutExercise`. The Phase 5 schema adds `WaterEntry` and `Measurement`; goals, charts, nutrition, plans, social, and AI models remain later work.
+The Phase 4 Prisma schema adds `Exercise`, `Workout`, and `WorkoutExercise`.
+The Phase 5 schema adds `WaterEntry` and `Measurement`; Phase 6 adds `Goal`.
+Nutrition, plans, social, and AI models remain later work.
 
 The API limits a workout to 50 exercise entries per create/update request to bound nested writes.
 
@@ -361,10 +370,22 @@ Open Decision:
 Question: Which measurement units and fields should be presented to users?
 Why it matters: Units affect storage, validation, comparison, and display.
 Current assumption: Use the measurement fields already listed in this document, store weight in kilograms and body dimensions in centimeters, and convert weight for display/input using the profile preference.
-Impact: Users can record only applicable metrics; a snapshot needs at least one value. Measurements are date-only, multiple snapshots per day are allowed, and charting remains Phase 6.
+Impact: Users can record only applicable metrics; a snapshot needs at least one value. Measurements are date-only, multiple snapshots per day are allowed, and Phase 6 progress charts use these recorded values.
 
 ## 13. Current Assumptions
 
 This database design is intentionally conservative. It supports the core fitness-tracking MVP and keeps optional social or AI features out of the schema until they are required.
 
-The current Prisma schema contains `User`, `RefreshToken`, `Profile`, `Exercise`, `Workout`, `WorkoutExercise`, `WaterEntry`, and `Measurement`. Goals, nutrition, and plan models remain future phase work.
+The current Prisma schema contains `User`, `RefreshToken`, `Profile`,
+`Exercise`, `Workout`, `WorkoutExercise`, `WaterEntry`, `Measurement`, and
+`Goal`. Nutrition and plan models remain future phase work.
+
+Open Decision:
+Question: Should goal progress support more metrics, custom periods, or manually
+entered values?
+Why it matters: These choices change goal semantics and make progress
+calculations more complex.
+Current assumption: Phase 6 supports only daily water, weekly workouts, and
+target body weight, with values derived from current records.
+Impact: Other metrics and custom/manual progress are deferred until a
+documented requirement is approved.

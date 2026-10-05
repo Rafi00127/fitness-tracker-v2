@@ -21,7 +21,7 @@ describe('DashboardService', () => {
     service = new DashboardService(prismaMock as unknown as PrismaService);
   });
 
-  it('returns the signed-in user summary without pretending future data exists', async () => {
+  it('returns the signed-in user summary with implemented tracking modules', async () => {
     const summary = await service.getSummary('owner-1');
 
     expect(prismaMock.user.findUnique).toHaveBeenCalledWith(
@@ -33,7 +33,7 @@ describe('DashboardService', () => {
       { key: 'workouts', available: true, plannedPhase: 4 },
       { key: 'water', available: true, plannedPhase: 5 },
       { key: 'measurements', available: true, plannedPhase: 5 },
-      { key: 'goals', available: false, plannedPhase: 6 },
+      { key: 'goals', available: true, plannedPhase: 6 },
     ]);
   });
 

@@ -121,3 +121,8 @@ Phase 3 profile and dashboard handlers require the access-token guard and derive
 Phase 4 exercise and workout handlers use the same guard and owner-scoped persistence. Nested workout exercise IDs are verified as owned by the authenticated user, preventing cross-account references. Deleting a workout cascades only to its own entries; exercise references are restricted to preserve history.
 
 Phase 5 water and measurement handlers also require authentication and scope every read, aggregate, update, and delete to the verified user. The API validates dates and numeric ranges before persistence; health records are not shared across accounts.
+
+Phase 6 goal and chart handlers follow the same owner-only rule. Aggregations
+are filtered by the verified user ID; client-supplied progress values are not
+accepted or trusted. Goal titles and measurement-derived values are treated as
+private health-related data and are not logged.

@@ -94,6 +94,31 @@ export interface MeasurementRecord {
   updatedAt: string;
 }
 
+export type GoalMetric =
+  | "DAILY_WATER_ML"
+  | "WEEKLY_WORKOUTS"
+  | "TARGET_WEIGHT_KG";
+
+export interface GoalRecord {
+  id: string;
+  title: string;
+  metric: GoalMetric;
+  targetValue: number;
+  targetDate: string | null;
+  startingWeightKg: number | null;
+  currentValue: number | null;
+  progressPercent: number | null;
+  status: "ACTIVE" | "COMPLETED" | "OVERDUE";
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GoalProgress {
+  water: Array<{ date: string; value: number }>;
+  workouts: Array<{ date: string; value: number }>;
+  weight: Array<{ date: string; value: number | null }>;
+}
+
 export interface PaginatedResult<T> {
   items: T[];
   pagination: {
@@ -142,6 +167,13 @@ export interface MeasurementInput {
   bicepsCm?: number | null;
   bodyFatPercent?: number | null;
   notes?: string | null;
+}
+
+export interface GoalInput {
+  title: string;
+  metric: GoalMetric;
+  targetValue: number;
+  targetDate?: string | null;
 }
 
 export async function getProfile(session: AuthSession): Promise<ProfileData> {
@@ -496,6 +528,99 @@ export async function deleteMeasurement(
   }
 }
 
+export async function getGoals(
+  session: AuthSession,
+  options: { page?: number; limit?: number } = {},
+): Promise<PaginatedResult<GoalRecord>> {
+  const query = new URLSearchParams({
+    page: String(options.page ?? 1),
+    limit: String(options.limit ?? 20),
+  });
+  const response = await requestEnvelope(
+    `/goals?${query.toString()}`,
+    session.accessToken,
+  );
+  if (
+    !Array.isArray(response.data) ||
+    !response.data.every(isGoalRecord) ||
+    !isPagination(response.meta.pagination)
+  ) {
+    throw new Error("The goals service returned an invalid response.");
+  }
+  return { items: response.data, pagination: response.meta.pagination };
+}
+
+export async function createGoal(
+  session: AuthSession,
+  input: GoalInput,
+): Promise<GoalRecord> {
+  const data = await requestData("/goals", session.accessToken, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+  if (!isGoalRecord(data)) {
+    throw new Error("The goals service returned an invalid response.");
+  }
+  return data;
+}
+
+export async function updateGoal(
+  session: AuthSession,
+  goalId: string,
+  input: Partial<Pick<GoalInput, "title" | "targetValue" | "targetDate">>,
+): Promise<GoalRecord> {
+  const data = await requestData(
+    `/goals/${encodeURIComponent(goalId)}`,
+    session.accessToken,
+    { method: "PATCH", body: JSON.stringify(input) },
+  );
+  if (!isGoalRecord(data)) {
+    throw new Error("The goals service returned an invalid response.");
+  }
+  return data;
+}
+
+export async function deleteGoal(
+  session: AuthSession,
+  goalId: string,
+): Promise<void> {
+  const data = await requestData(
+    `/goals/${encodeURIComponent(goalId)}`,
+    session.accessToken,
+    { method: "DELETE" },
+  );
+  if (!isRecord(data) || data.success !== true) {
+    throw new Error("The goals service returned an invalid response.");
+  }
+}
+
+export async function getGoalProgress(
+  session: AuthSession,
+  options: { from: string; to: string },
+): Promise<GoalProgress> {
+  const query = new URLSearchParams(options);
+  const data = await requestData(
+    `/goals/progress?${query.toString()}`,
+    session.accessToken,
+  );
+  if (
+    !isRecord(data) ||
+    !Array.isArray(data.water) ||
+    !data.water.every(isChartPoint) ||
+    !Array.isArray(data.workouts) ||
+    !data.workouts.every(isChartPoint) ||
+    !Array.isArray(data.weight) ||
+    !data.weight.every(isWeightChartPoint)
+  ) {
+    throw new Error("The progress service returned an invalid response.");
+  }
+  return {
+    water: data.water,
+    workouts: data.workouts,
+    weight: data.weight,
+  };
+}
+
 async function requestData(
   endpoint: string,
   accessToken: string,
@@ -691,6 +816,52 @@ function isMeasurementRecord(value: unknown): value is MeasurementRecord {
     (typeof value.notes === "string" || value.notes === null) &&
     typeof value.createdAt === "string" &&
     typeof value.updatedAt === "string"
+  );
+}
+
+function isGoalRecord(value: unknown): value is GoalRecord {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.title === "string" &&
+    isGoalMetric(value.metric) &&
+    typeof value.targetValue === "number" &&
+    (typeof value.targetDate === "string" || value.targetDate === null) &&
+    isNullableNumber(value.startingWeightKg) &&
+    isNullableNumber(value.currentValue) &&
+    isNullableNumber(value.progressPercent) &&
+    (value.status === "ACTIVE" ||
+      value.status === "COMPLETED" ||
+      value.status === "OVERDUE") &&
+    typeof value.createdAt === "string" &&
+    typeof value.updatedAt === "string"
+  );
+}
+
+function isGoalMetric(value: unknown): value is GoalMetric {
+  return (
+    value === "DAILY_WATER_ML" ||
+    value === "WEEKLY_WORKOUTS" ||
+    value === "TARGET_WEIGHT_KG"
+  );
+}
+
+function isChartPoint(value: unknown): value is { date: string; value: number } {
+  return (
+    isRecord(value) &&
+    typeof value.date === "string" &&
+    typeof value.value === "number" &&
+    Number.isFinite(value.value)
+  );
+}
+
+function isWeightChartPoint(
+  value: unknown,
+): value is { date: string; value: number | null } {
+  return (
+    isRecord(value) &&
+    typeof value.date === "string" &&
+    isNullableNumber(value.value)
   );
 }
 

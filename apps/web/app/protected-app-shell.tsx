@@ -76,6 +76,12 @@ export function ProtectedAppShell({ children }: { children: ReactNode }) {
             >
               Measurements
             </Link>
+            <Link
+              className="text-sm text-zinc-700 hover:text-zinc-950"
+              href="/goals"
+            >
+              Goals
+            </Link>
           </nav>
           <SessionActions />
         </div>

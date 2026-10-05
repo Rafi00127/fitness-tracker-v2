@@ -36,6 +36,11 @@ The Phase 4 migration has been applied and verified against the local Docker Com
 
 The Phase 5 migration adds owner-cascading `WaterEntry` and `Measurement` tables. Water entries are unique per user-selected calendar date; measurement snapshots may repeat dates. Both tables are indexed by user and date. The migration is additive and does not rewrite or delete existing user data.
 
+The Phase 6 migration adds an owner-cascading `Goal` table with a metric enum,
+target value, optional target date, and optional starting weight baseline.
+Progress values are derived at request time from the existing tracking tables;
+the migration does not backfill fabricated activity or alter existing records.
+
 ## 4. Production Safety
 
 Production migrations must be treated carefully. Before applying a migration to a production environment, the team should confirm:

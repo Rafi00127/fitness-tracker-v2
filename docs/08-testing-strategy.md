@@ -114,3 +114,10 @@ Phase 3's migration and live service flow were also smoke-tested against the loc
 Phase 4 adds service and endpoint coverage for workout/exercise CRUD, validation, nested exercise ownership, date filtering, and delete behavior. Playwright covers exercise creation and a workout create/history/detail journey. Persistence integration tests use the local Compose database only with temporary test accounts/records that are deleted by the test; unit/API tests mock persistence. Never reset the development or production database to prepare test fixtures.
 
 Phase 5 adds service and authenticated endpoint coverage for daily water totals, measurement snapshots, date filters, validation, and owner scoping. Playwright covers water create/update/delete and range summaries, plus measurement entry, profile-unit conversion, history, and comparison. Migration deployment and live API smoke tests use the local Compose PostgreSQL stack and temporary account data that is removed after each run; do not reset the database.
+
+Phase 6 adds goal service tests for metric validation, baseline capture,
+time-window progress, completion/overdue status, and owner scoping. Authenticated
+endpoint tests cover CRUD, progress data, invalid metrics, and cross-account
+isolation. Playwright covers goal creation/edit/delete, auto-derived progress,
+chart history, and dashboard integration. Chart tests verify labels and
+recorded values rather than relying only on visual appearance.

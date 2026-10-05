@@ -78,6 +78,11 @@ The following capabilities are expressly future-phase or optional, not MVP requi
 - Users can track progress toward goals.
 - Users can review charts or summarized progress data.
 
+Phase 6 initial scope is limited to daily water intake, workouts per calendar
+week, and target body weight. Current values are derived from the user's water,
+workout, and measurement records; goal progress is not manually entered.
+Progress charts show existing water, workout, and weight history only.
+
 ### 4.6 Nutrition
 
 - Users can log nutrition entries or meals with contextual data.
@@ -180,3 +185,16 @@ Impact: Plans remain simple and user-centric.
 ## 10. Documentation and Scope Constraints
 
 This document intentionally does not define detailed business rules beyond what is necessary to support MVP planning. Future expansion is documented as future scope, not as a current requirement.
+
+Phase 6 implementation assumptions:
+
+- Daily water progress uses the current UTC calendar day's water total.
+- Weekly workout progress uses the current UTC Monday-to-Sunday week.
+- A target-weight goal captures the latest recorded weight at goal creation as
+  its baseline. The target direction is inferred by comparing the target with
+  that baseline; creating a target equal to the baseline is rejected.
+- Goal completion and overdue state are derived from current progress and the
+  optional target date; no manual progress values or user-selected statuses are
+  stored.
+- Charts use persisted records only. Missing water/workout records are not
+  silently presented as confirmed zero activity.
