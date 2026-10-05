@@ -19,6 +19,7 @@ const moduleNames: Record<
   water: "Water",
   measurements: "Measurements",
   goals: "Goals",
+  nutrition: "Nutrition",
 };
 
 export default function DashboardPage() {
@@ -199,6 +200,14 @@ export default function DashboardPage() {
                         href="/goals"
                       >
                         View goals
+                      </Link>
+                    )}
+                    {item.key === "nutrition" && item.available && (
+                      <Link
+                        className="mt-3 inline-block text-sm font-medium text-zinc-700 underline underline-offset-4"
+                        href="/nutrition"
+                      >
+                        View nutrition log
                       </Link>
                     )}
                   </article>

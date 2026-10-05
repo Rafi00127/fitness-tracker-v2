@@ -65,6 +65,7 @@ test("shows available tracking modules and an empty goal overview", async ({
             { key: "water", available: true, plannedPhase: 5 },
             { key: "measurements", available: true, plannedPhase: 5 },
             { key: "goals", available: true, plannedPhase: 6 },
+            { key: "nutrition", available: true, plannedPhase: 7 },
           ],
         },
         meta: { timestamp: new Date().toISOString() },
@@ -93,7 +94,7 @@ test("shows available tracking modules and an empty goal overview", async ({
   await expect(
     page.getByRole("main").getByText("member@example.com"),
   ).toBeVisible();
-  await expect(page.getByText("Available now")).toHaveCount(4);
+  await expect(page.getByText("Available now")).toHaveCount(5);
   await expect(page.getByText("Available in Phase 5")).toHaveCount(0);
   await expect(page.getByText("Available in Phase 6")).toHaveCount(0);
   await expect(
@@ -103,6 +104,9 @@ test("shows available tracking modules and an empty goal overview", async ({
     page.getByRole("link", { name: "View measurements" }),
   ).toBeVisible();
   await expect(page.getByRole("link", { name: "View goals" })).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "View nutrition log" }),
+  ).toBeVisible();
   await expect(page.getByText("Create a goal to see automatically calculated progress here.")).toBeVisible();
   await expect(
     page.getByText(
@@ -133,6 +137,7 @@ test("shows automatically calculated goal progress on the dashboard", async ({
             { key: "water", available: true, plannedPhase: 5 },
             { key: "measurements", available: true, plannedPhase: 5 },
             { key: "goals", available: true, plannedPhase: 6 },
+            { key: "nutrition", available: true, plannedPhase: 7 },
           ],
         },
         meta: { timestamp: new Date().toISOString() },

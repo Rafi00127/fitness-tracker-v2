@@ -130,3 +130,14 @@
 - [x] update related product, database, API, UI, security, testing, migration,
       and roadmap documentation
 - [x] apply migration to local PostgreSQL and validate the integrated stack
+
+## 18. Phase 7 — Nutrition
+
+- [x] add owner-scoped NutritionEntry model and additive migration
+- [x] implement authenticated nutrition CRUD, date-range filtering, and
+      recorded-value summaries
+- [x] build nutrition logging/history UI and dashboard entry point
+- [x] add service, endpoint validation/ownership, and Playwright coverage
+- [x] update product, database, API, UI, security, testing, migration, and
+      roadmap documentation
+- [x] apply migration to local PostgreSQL and validate the integrated stack

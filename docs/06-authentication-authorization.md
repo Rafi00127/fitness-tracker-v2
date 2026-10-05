@@ -161,3 +161,12 @@ The backend is the single source of truth for access decisions.
   their source water, workout, and measurement records.
 - Aggregate and chart queries must never include another user's records.
 - Goal progress is server-derived; client-submitted current values are rejected.
+
+## 19. Phase 7 Nutrition Access
+
+- Nutrition list, summary, read, create, update, and delete endpoints require
+  the access-token guard.
+- The verified token subject supplies the owner scope for both entry records
+  and range aggregates; clients cannot select another owner.
+- Nutrient totals include only non-null values belonging to that owner and
+  selected inclusive date range.

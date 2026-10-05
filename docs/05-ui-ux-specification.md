@@ -59,12 +59,13 @@ The refresh token is never exposed to page JavaScript or browser storage. The HT
 
 The dashboard is the main landing screen for authenticated users.
 
-Current dashboard content (Phase 3 shell, extended in Phases 4 through 6):
+Current dashboard content (Phase 3 shell, extended in Phases 4 through 7):
 
 - account and profile setup overview
 - profile link
 - an available workout card and up to five recent workout entries
 - available cards for workouts, water, measurements, and goals
+- an available nutrition card linking to the nutrition log
 - a concise overview of active goals and their current derived progress, with a link to goal management
 - a recent-workout empty state when the user has no workouts
 
@@ -137,10 +138,16 @@ Measurement history charts are available in Phase 6. The date fields represent u
 
 ## 11. Nutrition
 
-- quick meal or nutrition logging form
-- list of simple entries
-- summary of calories and macro values if tracked
-- no requirement for a full nutrition-science database in MVP
+- allow a user to record a date, meal/intake description, optional calories
+  (kcal), optional protein/carbohydrate/fat (grams), and optional notes
+- show the user's entries newest first with inclusive date-range filtering
+- allow editing and deleting an owned entry
+- summarize logged values for the selected range, independently of list
+  pagination; label totals as based on recorded values, since absent nutrient
+  fields are unknown rather than zero
+- provide loading, empty, validation, and server-error states
+- do not include food search/catalog, serving-size calculations, dietary
+  recommendations, or nutrition-derived goal progress
 
 ## 12. Plans and Scheduling
 

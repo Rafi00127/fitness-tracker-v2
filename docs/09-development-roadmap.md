@@ -208,12 +208,15 @@ Dependencies:
 Acceptance criteria:
 - users can record basic nutrition entries
 - entries are associated with the correct user
+- users can review entries and date-range totals for manually recorded values
 
 Validation:
-- API and UI tests for nutrition logging
+- API tests cover validation, aggregation, and owner scoping; UI tests cover
+  nutrition logging and review
 
 Exit gate:
-- nutrition remains limited to the simplest meaningful scope for MVP
+- nutrition remains limited to manual entries and recorded-value summaries;
+  no food catalog, nutrient inference, or dietary recommendations
 
 ## 9. Phase 8 — Plans / Scheduling
 

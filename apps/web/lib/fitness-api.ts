@@ -34,7 +34,7 @@ export interface DashboardSummary {
     exercises: string[];
   }>;
   trackingModules: Array<{
-    key: "workouts" | "water" | "measurements" | "goals";
+    key: "workouts" | "water" | "measurements" | "goals" | "nutrition";
     available: boolean;
     plannedPhase: number;
   }>;
@@ -174,6 +174,42 @@ export interface GoalInput {
   metric: GoalMetric;
   targetValue: number;
   targetDate?: string | null;
+}
+
+export interface NutritionEntryRecord {
+  id: string;
+  date: string;
+  description: string;
+  caloriesKcal: number | null;
+  proteinGrams: number | null;
+  carbsGrams: number | null;
+  fatsGrams: number | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface NutritionValueSummary {
+  recordedEntryCount: number;
+  total: number;
+}
+
+export interface NutritionSummary {
+  entryCount: number;
+  caloriesKcal: NutritionValueSummary;
+  proteinGrams: NutritionValueSummary;
+  carbsGrams: NutritionValueSummary;
+  fatsGrams: NutritionValueSummary;
+}
+
+export interface NutritionInput {
+  date: string;
+  description: string;
+  caloriesKcal?: number | null;
+  proteinGrams?: number | null;
+  carbsGrams?: number | null;
+  fatsGrams?: number | null;
+  notes?: string | null;
 }
 
 export async function getProfile(session: AuthSession): Promise<ProfileData> {
@@ -453,6 +489,93 @@ export async function deleteWaterEntry(
   );
   if (!isRecord(data) || data.success !== true) {
     throw new Error("The water service returned an invalid response.");
+  }
+}
+
+export async function getNutritionEntries(
+  session: AuthSession,
+  options: {
+    from?: string;
+    to?: string;
+    page?: number;
+    limit?: number;
+  } = {},
+): Promise<PaginatedResult<NutritionEntryRecord>> {
+  const query = new URLSearchParams();
+  if (options.from) query.set("from", options.from);
+  if (options.to) query.set("to", options.to);
+  query.set("page", String(options.page ?? 1));
+  query.set("limit", String(options.limit ?? 20));
+  const response = await requestEnvelope(
+    `/nutrition?${query.toString()}`,
+    session.accessToken,
+  );
+  if (
+    !Array.isArray(response.data) ||
+    !response.data.every(isNutritionEntryRecord) ||
+    !isPagination(response.meta.pagination)
+  ) {
+    throw new Error("The nutrition service returned an invalid response.");
+  }
+  return { items: response.data, pagination: response.meta.pagination };
+}
+
+export async function getNutritionSummary(
+  session: AuthSession,
+  options: { from: string; to: string },
+): Promise<NutritionSummary> {
+  const query = new URLSearchParams(options);
+  const data = await requestData(
+    `/nutrition/summary?${query.toString()}`,
+    session.accessToken,
+  );
+  if (!isNutritionSummary(data)) {
+    throw new Error("The nutrition service returned an invalid summary.");
+  }
+  return data;
+}
+
+export async function createNutritionEntry(
+  session: AuthSession,
+  input: NutritionInput,
+): Promise<NutritionEntryRecord> {
+  const data = await requestData("/nutrition", session.accessToken, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+  if (!isNutritionEntryRecord(data)) {
+    throw new Error("The nutrition service returned an invalid response.");
+  }
+  return data;
+}
+
+export async function updateNutritionEntry(
+  session: AuthSession,
+  entryId: string,
+  input: Partial<NutritionInput>,
+): Promise<NutritionEntryRecord> {
+  const data = await requestData(
+    `/nutrition/${encodeURIComponent(entryId)}`,
+    session.accessToken,
+    { method: "PATCH", body: JSON.stringify(input) },
+  );
+  if (!isNutritionEntryRecord(data)) {
+    throw new Error("The nutrition service returned an invalid response.");
+  }
+  return data;
+}
+
+export async function deleteNutritionEntry(
+  session: AuthSession,
+  entryId: string,
+): Promise<void> {
+  const data = await requestData(
+    `/nutrition/${encodeURIComponent(entryId)}`,
+    session.accessToken,
+    { method: "DELETE" },
+  );
+  if (!isRecord(data) || data.success !== true) {
+    throw new Error("The nutrition service returned an invalid response.");
   }
 }
 
@@ -738,7 +861,8 @@ function isTrackingModuleKey(
     value === "workouts" ||
     value === "water" ||
     value === "measurements" ||
-    value === "goals"
+    value === "goals" ||
+    value === "nutrition"
   );
 }
 
@@ -802,6 +926,45 @@ function isWaterEntryRecord(value: unknown): value is WaterEntryRecord {
     typeof value.createdAt === "string" &&
     typeof value.updatedAt === "string" &&
     (typeof value.notes === "string" || value.notes === null)
+  );
+}
+
+function isNutritionEntryRecord(
+  value: unknown,
+): value is NutritionEntryRecord {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.date === "string" &&
+    typeof value.description === "string" &&
+    isNullableNumber(value.caloriesKcal) &&
+    isNullableNumber(value.proteinGrams) &&
+    isNullableNumber(value.carbsGrams) &&
+    isNullableNumber(value.fatsGrams) &&
+    (typeof value.notes === "string" || value.notes === null) &&
+    typeof value.createdAt === "string" &&
+    typeof value.updatedAt === "string"
+  );
+}
+
+function isNutritionSummary(value: unknown): value is NutritionSummary {
+  return (
+    isRecord(value) &&
+    Number.isInteger(value.entryCount) &&
+    isNutritionValueSummary(value.caloriesKcal) &&
+    isNutritionValueSummary(value.proteinGrams) &&
+    isNutritionValueSummary(value.carbsGrams) &&
+    isNutritionValueSummary(value.fatsGrams)
+  );
+}
+
+function isNutritionValueSummary(value: unknown): value is NutritionValueSummary {
+  return (
+    isRecord(value) &&
+    Number.isInteger(value.recordedEntryCount) &&
+    typeof value.total === "number" &&
+    Number.isFinite(value.total) &&
+    value.total >= 0
   );
 }
 

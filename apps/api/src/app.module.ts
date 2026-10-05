@@ -10,6 +10,7 @@ import { WorkoutsModule } from './workouts/workouts.module';
 import { MeasurementsModule } from './measurements/measurements.module';
 import { WaterModule } from './water/water.module';
 import { GoalsModule } from './goals/goals.module';
+import { NutritionModule } from './nutrition/nutrition.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { GoalsModule } from './goals/goals.module';
     WaterModule,
     MeasurementsModule,
     GoalsModule,
+    NutritionModule,
   ],
   controllers: [AppController],
   providers: [AppService],

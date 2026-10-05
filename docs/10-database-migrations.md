@@ -41,6 +41,13 @@ target value, optional target date, and optional starting weight baseline.
 Progress values are derived at request time from the existing tracking tables;
 the migration does not backfill fabricated activity or alter existing records.
 
+The Phase 7 migration adds the owner-cascading `NutritionEntry` table with a
+date index and nullable calorie/macro/notes values. It permits multiple
+entries for the same owner and date. The change is additive and does not
+rewrite, populate, or delete existing records. It has been applied and
+verified against local development PostgreSQL only; this is not production
+migration approval.
+
 ## 4. Production Safety
 
 Production migrations must be treated carefully. Before applying a migration to a production environment, the team should confirm:

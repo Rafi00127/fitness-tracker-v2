@@ -91,16 +91,18 @@ Key documents:
 
 ## Current Implementation Status
 
-Phases 1-6 are implemented and validated locally. Phase 6 adds private goals
+Phases 1-7 are implemented and validated locally. Phase 6 adds private goals
 for daily water, weekly workouts, and target body weight, with progress derived
-from existing records and accessible history charts.
+from existing records and accessible history charts. Phase 7 adds private,
+manual nutrition entries and date-range summaries based only on values users
+recorded.
 
-The workouts/exercises, water/measurements, and goals migrations are applied to
-the local PostgreSQL database. Phase 6 checks cover goal calculations, chart
-history, validation, ownership, and dashboard integration. The web app and API
-run at `http://localhost:3000` and `http://localhost:3001`.
-After signing in, open `http://localhost:3000/goals` to manage goals and view
-progress charts.
+The workouts/exercises, water/measurements, goals, and nutrition migrations
+are applied to the local PostgreSQL database. Phase 7 does not estimate
+missing nutrient values or include a food catalog or diet advice. The web app
+and API run at `http://localhost:3000` and `http://localhost:3001`.
+After signing in, open `http://localhost:3000/nutrition` to log meals and
+review recorded-value summaries, or `/goals` to manage progress goals.
 
 To run the API locally, copy `.env.example` to `.env`, replace both auth-secret placeholders with different random values of at least 32 UTF-8 bytes, start PostgreSQL with Docker Compose, then from the repository root run:
 
@@ -109,7 +111,7 @@ npm run db:generate
 npx prisma migrate deploy --schema apps/api/prisma/schema.prisma
 ```
 
-Run the web and API apps with `npm run dev:web` and `npm run dev:api`. The browser calls same-origin `/api/v1` routes, which Next.js proxies to the API using `API_INTERNAL_URL` (defaults to `http://localhost:3001`). API unit/endpoint tests mock persistence and Playwright tests mock API responses; these checks do not require PostgreSQL. Applying the profile, workouts, water, measurements, and goals migrations requires PostgreSQL.
+Run the web and API apps with `npm run dev:web` and `npm run dev:api`. The browser calls same-origin `/api/v1` routes, which Next.js proxies to the API using `API_INTERNAL_URL` (defaults to `http://localhost:3001`). API unit/endpoint tests mock persistence and Playwright tests mock API responses; these checks do not require PostgreSQL. Applying the profile, workouts, water, measurements, goals, and nutrition migrations requires PostgreSQL.
 
 ## Environment Setup
 
@@ -161,7 +163,7 @@ See [docs/06-authentication-authorization.md](./docs/06-authentication-authoriza
 
 ## Roadmap Summary
 
-The project roadmap begins with foundational setup and proceeds through authentication, profile/dashboard, workouts and exercises, water and measurements, goals and charts, nutrition, plans and scheduling, then optional social and AI/device integrations.
+The project roadmap begins with foundational setup and proceeds through authentication, profile/dashboard, workouts and exercises, water and measurements, goals and charts, nutrition, plans and scheduling, then optional social and AI/device integrations. Plans and scheduling remain Phase 8, not an MVP requirement.
 
 This is intentionally staged so later phases do not become MVP requirements. The full roadmap is documented in [docs/09-development-roadmap.md](./docs/09-development-roadmap.md).
 
@@ -180,12 +182,16 @@ This project documentation uses a conservative approach when details are not yet
 
 ## Validation Status
 
-Phases 1-6 are implemented. Prisma validation, lint, type checks, API unit
-and endpoint tests, Playwright, production builds, Phase 6 migration
-deployment, and local Docker API smoke tests pass. The database migration has
-been verified only against the local development PostgreSQL instance;
-production rollout requires its own review.
+Phases 1-7 are implemented and validated. Nutrition records are manually
+entered and owner-private. The feature uses optional user-entered
+calorie/macronutrient values and does not estimate missing values, provide a
+food catalog, or recommend a diet. Prisma validation and migration status,
+lint, type checks, API unit and endpoint tests, Playwright, production builds,
+Docker image builds, and live local API ownership/aggregation checks pass.
+The database migration has been verified only against local development
+PostgreSQL; production rollout requires its own review.
 
 ## Recommended Next Task
 
-Start Phase 7 — Nutrition when requested.
+Phase 7 is complete. Phase 8 — Plans / Scheduling remains deferred until
+explicitly requested.

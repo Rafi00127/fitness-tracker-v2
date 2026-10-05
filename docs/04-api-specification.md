@@ -140,7 +140,7 @@ Workout create fields: `title` (required, 1-120 characters), `date` (ISO-8601 ti
 
 List pagination defaults to `page=1` and `limit=20`; `limit` is capped at 100. `from` and `to` are inclusive ISO-8601 timestamp filters. `q` searches exercise name/category. Responses use the standard success envelope; list responses include `meta.pagination`.
 
-All lookup and mutation ownership derives from the verified token subject. A workout cannot reference another user's exercise. Water and measurements are implemented in Phase 5; goals are implemented in Phase 6, while nutrition and plans remain future work.
+All lookup and mutation ownership derives from the verified token subject. A workout cannot reference another user's exercise. Water and measurements are implemented in Phase 5, goals in Phase 6, and nutrition in Phase 7. Plans remain future work.
 
 ## 8. Water and Measurement Endpoints
 
@@ -198,21 +198,41 @@ Chart history returns only persisted values in the requested inclusive date
 range, ordered chronologically; absent records are not synthesized as
 zero-valued activity. The range is limited to 365 days.
 
-## 10. Future Nutrition and Plans Endpoints
+## 10. Nutrition Endpoints
 
-Likely endpoints:
+All endpoints require an access-token bearer header and derive ownership from
+the verified token subject.
 
-- `GET /api/v1/goals`
-- `POST /api/v1/goals`
-- `GET /api/v1/nutrition`
-- `POST /api/v1/nutrition`
-- `GET /api/v1/plans`
-- `POST /api/v1/plans`
+- `GET /api/v1/nutrition?page=1&limit=20&from=YYYY-MM-DD&to=YYYY-MM-DD`
+  lists the user's entries newest date first. Date filters are optional and
+  inclusive; pagination uses the standard list envelope.
+- `POST /api/v1/nutrition` creates an entry with required `date` and
+  `description`, and optional `caloriesKcal`, `proteinGrams`, `carbsGrams`,
+  `fatsGrams`, and `notes`.
+- `GET /api/v1/nutrition/:id`, `PATCH /api/v1/nutrition/:id`, and
+  `DELETE /api/v1/nutrition/:id` read, update, or delete one owned entry.
+- `GET /api/v1/nutrition/summary?from=YYYY-MM-DD&to=YYYY-MM-DD` returns
+  inclusive-range totals independent of list pagination.
 
-Requirements:
+The summary `data` contains `entryCount` and one object each for
+`caloriesKcal`, `proteinGrams`, `carbsGrams`, and `fatsGrams`. Each nutrient
+object contains `recordedEntryCount` and `total`; `total` is zero when no
+values were recorded, and clients should use the count to display that no
+value was logged rather than implying an actual zero intake.
 
-- plan entities remain lightweight in MVP
-- nutrition intake tracking may be limited to basic records in the initial phase
+The summary requires both dates, and its inclusive date range is limited to
+365 days. For list filtering, the same limit applies when both optional bounds
+are supplied. `description` is 1-120 characters;
+`notes` is at most 1000 characters. Calories are whole kcal from 0 to 10000;
+each optional macro is a decimal from 0 to 1000 grams, stored to two decimal
+places. Missing values are excluded from that nutrient's sum and are not
+interpreted as zero. Summary responses include the entry count and, for each
+nutrient, its recorded-value count and sum, so clients can disclose that
+totals include only logged values. The API does not infer nutrients or provide
+nutrition advice.
+
+Plans and scheduling remain a later roadmap phase and are not part of this
+contract.
 
 ## 11. Pagination, Filtering, and Sorting
 
@@ -271,4 +291,4 @@ The project intends to document the API explicitly as implementation begins. Dur
 
 ## 17. Current Assumptions
 
-The workout edit child-list replacement rule and exercise-delete conflict behavior are conservative Phase 4 choices, not immutable product requirements. Exercise taxonomy and whether duplicates should be forbidden remain open decisions; categories are free text and names may repeat until specified otherwise. The Phase 6 goal metric set and UTC progress windows are conservative initial choices; adding metrics or manual progress requires an approved requirement. Future nutrition and plan endpoints above are planned direction, not implemented routes; add them only when the matching roadmap phase is approved.
+The workout edit child-list replacement rule and exercise-delete conflict behavior are conservative Phase 4 choices, not immutable product requirements. Exercise taxonomy and whether duplicates should be forbidden remain open decisions; categories are free text and names may repeat until specified otherwise. The Phase 6 goal metric set and UTC progress windows are conservative initial choices; adding metrics or manual progress requires an approved requirement. Phase 7 nutrition routes implement manually recorded entries and summaries only. Plan endpoints remain future direction and must wait for the matching roadmap phase.

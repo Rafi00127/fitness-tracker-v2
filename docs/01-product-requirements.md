@@ -33,7 +33,7 @@ The product must support the following core capabilities in a phased, MVP-first 
 - body measurement tracking over time
 - goal creation and progress comparison
 - progress charts and historical trend visualization
-- nutrition logging and simple dietary tracking
+- basic nutrition logging
 - plans and schedule management for training routines
 
 The following capabilities are expressly future-phase or optional, not MVP requirements:
@@ -43,6 +43,7 @@ The following capabilities are expressly future-phase or optional, not MVP requi
 - device integrations
 - coach-facing collaboration features
 - automated external data ingestion
+- plans and scheduling (Phase 8)
 
 ## 4. Functional Requirements
 
@@ -85,9 +86,12 @@ Progress charts show existing water, workout, and weight history only.
 
 ### 4.6 Nutrition
 
-- Users can log nutrition entries or meals with contextual data.
-- Users can track dietary patterns relevant to fitness goals.
-- Users can maintain a record of consumed items without becoming a full nutrition-science platform.
+- Users can record a dated meal or nutrition entry with a description and
+  optional calories and macronutrients.
+- Users can review their entries and see date-range totals for the values they
+  recorded.
+- Nutrition logging is manual and does not require a food database or
+  nutrition calculation.
 
 ### 4.7 Plans and Scheduling
 
@@ -117,7 +121,6 @@ The MVP includes:
 - measurements
 - goals and charts
 - nutrition logging
-- plans and scheduling
 
 Everything beyond the listed MVP scope remains explicitly out of scope for the initial release.
 
@@ -130,6 +133,7 @@ The following items are deferred until later phases and are not required MVP fun
 - AI-generated workout or nutrition recommendations
 - wearable or device integrations
 - external coach collaboration workflows
+- plans and scheduling (Phase 8)
 - advanced analytics or prediction systems
 
 ## 8. Assumptions and Open Decisions
@@ -141,10 +145,13 @@ Current assumption: Yes. User records are private by default unless a documented
 Impact: The authorization model remains owner-only until an explicit sharing feature is required.
 
 Open Decision:
-Question: What level of nutrition tracking is required for MVP?
-Why it matters: Nutrition can expand into a full journaling and macro-calculation product.
-Current assumption: Keep nutrition logging simple and generic, without introducing advanced diet science or external food database requirements in MVP.
-Impact: Nutrition features are limited to basic logging and tracking patterns.
+Question: Should future nutrition work add a food catalog, serving sizes, or
+automatic nutrient calculations?
+Why it matters: Those features require food-source provenance, portion
+semantics, and additional validation/privacy decisions.
+Current assumption: Phase 7 stores manually entered meal descriptions and
+optional nutrient values only.
+Impact: Food lookup and nutrient inference remain out of scope.
 
 Open Decision:
 Question: What exact plan scheduling model is needed?
@@ -185,6 +192,17 @@ Impact: Plans remain simple and user-centric.
 ## 10. Documentation and Scope Constraints
 
 This document intentionally does not define detailed business rules beyond what is necessary to support MVP planning. Future expansion is documented as future scope, not as a current requirement.
+
+Phase 7 assumptions:
+
+- A nutrition entry is one user-described meal/intake record with a
+  user-selected calendar date.
+- Calories (kcal), protein, carbohydrates, and fat (grams) are optional
+  nonnegative values supplied by the user. Missing values remain unknown and
+  are excluded from their corresponding totals.
+- The feature does not provide serving-size math, food lookup, nutrient
+  inference, dietary advice, or automatic goal updates.
+- Multiple nutrition entries per date are supported.
 
 Phase 6 implementation assumptions:
 

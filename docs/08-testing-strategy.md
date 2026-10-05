@@ -60,6 +60,7 @@ Recommended E2E focus:
 - water entry flow
 - measurement tracking flow
 - goal creation and progress summary
+- nutrition entry create/edit/delete and date-range summary
 
 Do not add broad E2E coverage for low-value or speculative UI states.
 
@@ -121,3 +122,10 @@ endpoint tests cover CRUD, progress data, invalid metrics, and cross-account
 isolation. Playwright covers goal creation/edit/delete, auto-derived progress,
 chart history, and dashboard integration. Chart tests verify labels and
 recorded values rather than relying only on visual appearance.
+
+Phase 7 adds service and authenticated endpoint tests for nutrition CRUD,
+numeric/date validation, inclusive range summaries, nullable nutrient
+aggregation, pagination, and owner isolation. Playwright covers entry
+creation/edit/deletion and the selected-range summary, including empty and
+error states. Apply the additive migration and smoke-test with temporary local
+accounts only; never reset a database containing user data.

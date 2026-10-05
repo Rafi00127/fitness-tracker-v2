@@ -55,6 +55,7 @@ Expected frontend responsibilities:
 - workout creation and history views
 - goal tracking and summary charts
 - nutrition and water logging forms
+- nutrition history and recorded-value summaries
 - profile management screens
 - responsive layouts and accessibility handling
 - error, loading, empty, and validation states
@@ -166,6 +167,10 @@ Phase 6 keeps goal CRUD and progress aggregation in the NestJS modular
 monolith. Goal progress reads only owner-scoped water, workout, and measurement
 records; the browser renders chart data returned by the API and does not
 calculate authoritative progress.
+
+Phase 7 keeps nutrition entry CRUD and range aggregation in its own NestJS
+domain module. Nutrient summaries add only values explicitly recorded by the
+user; there is no food catalog or derived nutrient calculation.
 
 ## 8. Authentication Flow
 

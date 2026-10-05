@@ -34,6 +34,7 @@ describe('DashboardService', () => {
       { key: 'water', available: true, plannedPhase: 5 },
       { key: 'measurements', available: true, plannedPhase: 5 },
       { key: 'goals', available: true, plannedPhase: 6 },
+      { key: 'nutrition', available: true, plannedPhase: 7 },
     ]);
   });
 

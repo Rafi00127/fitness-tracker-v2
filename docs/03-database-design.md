@@ -196,24 +196,23 @@ Rules:
 
 Purpose: stores basic nutrition tracking data.
 
-Likely fields:
+Phase 7 implementation:
 
-- id
-- userId
-- date
-- mealType
-- calories
-- proteinGrams
-- carbsGrams
-- fatsGrams
-- notes
-- createdAt
-- updatedAt
+- `id` (cuid primary key), `userId`, calendar `date`, required `description`,
+  optional `caloriesKcal`, `proteinGrams`, `carbsGrams`, `fatsGrams`,
+  optional `notes`, `createdAt`, and `updatedAt`
+- calories are stored as an integer; macro values use two decimal places
+- multiple entries per user and date are supported; there is no meal taxonomy
+  or uniqueness constraint
+- each row is a manual user entry; nutrient values are not calculated from
+  foods or serving sizes
 
 Rules:
 
-- values should be nullable or optional based on the actual design
-- nutrition tracking is intentionally kept simple in MVP
+- records are private and owner-scoped
+- absent nutrient values mean unknown and are excluded from that nutrient's
+  summary total rather than treated as zero
+- date-range summaries aggregate only values the user explicitly recorded
 
 ### Plan
 
