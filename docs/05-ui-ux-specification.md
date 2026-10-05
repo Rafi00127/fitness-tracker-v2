@@ -59,14 +59,15 @@ The refresh token is never exposed to page JavaScript or browser storage. The HT
 
 The dashboard is the main landing screen for authenticated users.
 
-Phase 3 dashboard content:
+Current dashboard content (Phase 3 shell, extended in Phases 4 and 5):
 
 - account and profile setup overview
 - profile link
-- tracking-module cards clearly marked unavailable until their planned roadmap phase
-- a recent-activity empty state
+- an available workout card and up to five recent workout entries
+- available cards for workouts, water, and measurements, plus goals clearly marked unavailable until Phase 6
+- a recent-workout empty state when the user has no workouts
 
-Workout, water, measurement, and goal values, trends, or quick actions must not imply those later-phase features already exist.
+Goal values, progress, or quick actions must not imply that Phase 6 functionality already exists.
 
 Design considerations:
 
@@ -87,33 +88,34 @@ Date of birth, biography, avatar, and broader settings are not part of the imple
 
 ## 6. Workouts and Exercises
 
+Phase 4 implementation includes protected, responsive screens for an exercise catalog and workout history.
+
 ### Workouts screen
 
-- list of workout entries
-- filtering by date and type
-- create new workout flow
-- success/failure feedback
-- view and edit existing workout records
+- list workout entries, newest first, with date-range filtering and pagination
+- create a workout with title, date, optional duration/notes, and zero or more exercise entries
+- view workout detail and edit or delete a workout
+- when editing, the exercise-entry list is submitted as a whole
+- show loading, empty, validation, and server-error states
 
 ### Exercises screen
 
-- exercise catalog
-- add/update/delete exercise records
-- category or naming-based search if needed
+- list, search, create, edit, and delete the user's exercise catalog
+- use an optional free-text category; do not imply a fixed taxonomy
+- explain why deletion is blocked when an exercise is referenced by workout history
+- keep exercise ownership private to the signed-in user
+
+The workout entry form associates an existing exercise with optional sets, reps, weight, duration, and notes. Body measurements, goals, charts, nutrition, and plans remain outside Phase 4.
 
 ## 7. Water Tracking
 
-- daily water log
-- total intake summary for the selected date range
-- progress bar or metric card
-- ability to add or edit water log entries
+Phase 5 provides one daily total in milliliters, a selectable inclusive date range and sum, and create/edit/delete actions. A second entry for the same day is not allowed. No user water target or target-based progress bar is shown.
 
 ## 8. Measurements
 
-- measurement history list
-- form for recording body metrics
-- ability to compare measurements over time
-- trend or chart view for selected metrics
+Phase 5 provides date-based snapshots for weight, waist, chest, hip, biceps, and body-fat percentage. Values may be omitted when not applicable; each snapshot needs at least one value. Weight is displayed/input using the profile preference, while storage and API values use kg; other dimensions use cm. Users can review history, compare the latest two snapshots, and create/edit/delete records.
+
+Measurement charts are deferred to Phase 6. The date fields represent user-selected calendar days.
 
 ## 9. Goals
 

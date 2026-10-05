@@ -43,6 +43,10 @@ describe('AppModule (e2e)', () => {
     await request(app.getHttpServer())
       .get('/api/v1/dashboard/summary')
       .expect(401);
+    await request(app.getHttpServer()).get('/api/v1/exercises').expect(401);
+    await request(app.getHttpServer()).get('/api/v1/workouts').expect(401);
+    await request(app.getHttpServer()).get('/api/v1/water').expect(401);
+    await request(app.getHttpServer()).get('/api/v1/measurements').expect(401);
   });
 });
 

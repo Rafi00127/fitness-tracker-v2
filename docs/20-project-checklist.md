@@ -96,3 +96,25 @@
 - [x] future tracking cards are explicitly unavailable and do not fabricate data
 - [x] API and browser tests cover the Phase 3 flows
 - [x] validate/apply migration against PostgreSQL and verify the integrated Docker stack
+
+## 15. Phase 4 — Workouts / Exercises
+
+- [x] add owner-scoped Exercise, Workout, and WorkoutExercise models and migration
+- [x] implement authenticated, validated exercise/workout APIs
+- [x] enforce workout-exercise ownership and preserve history on exercise deletion
+- [x] implement exercise catalog and workout create/history/detail/edit/delete screens
+- [x] show actual recent workouts on the dashboard without enabling later tracking areas
+- [x] add service, endpoint, and Playwright coverage
+- [x] update API, database, UI, security, testing, migration, and roadmap documentation
+- [x] apply migration to PostgreSQL and smoke-test the integrated application
+
+## 16. Phase 5 — Water / Measurements
+
+- [x] add owner-scoped daily water and measurement snapshot models
+- [x] implement authenticated, validated water and measurement APIs
+- [x] support date filters and water intake totals without adding goal targets
+- [x] build water history/edit and measurement history/comparison screens
+- [x] update dashboard availability while keeping goals, charts, and later phases unavailable
+- [x] add service, endpoint, and Playwright coverage
+- [x] update API, database, UI, security, testing, migration, and roadmap documentation
+- [x] apply migration to PostgreSQL and smoke-test the integrated application

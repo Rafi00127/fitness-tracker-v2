@@ -20,7 +20,9 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-test("redirects signed-out visitors away from the dashboard", async ({ page }) => {
+test("redirects signed-out visitors away from the dashboard", async ({
+  page,
+}) => {
   await page.unroute("**/api/v1/auth/refresh");
   await page.route("**/api/v1/auth/refresh", async (route) => {
     await route.fulfill({
@@ -41,7 +43,7 @@ test("redirects signed-out visitors away from the dashboard", async ({ page }) =
   await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
 });
 
-test("shows the dashboard account and future tracking placeholders", async ({
+test("shows available workouts, water, and measurements plus the goals placeholder", async ({
   page,
 }) => {
   await page.route("**/api/v1/dashboard/summary", async (route) => {
@@ -59,9 +61,9 @@ test("shows the dashboard account and future tracking placeholders", async ({
           profileComplete: false,
           recentActivity: [],
           trackingModules: [
-            { key: "workouts", available: false, plannedPhase: 4 },
-            { key: "water", available: false, plannedPhase: 5 },
-            { key: "measurements", available: false, plannedPhase: 5 },
+            { key: "workouts", available: true, plannedPhase: 4 },
+            { key: "water", available: true, plannedPhase: 5 },
+            { key: "measurements", available: true, plannedPhase: 5 },
             { key: "goals", available: false, plannedPhase: 6 },
           ],
         },
@@ -78,12 +80,18 @@ test("shows the dashboard account and future tracking placeholders", async ({
   await expect(
     page.getByRole("main").getByText("member@example.com"),
   ).toBeVisible();
-  await expect(page.getByText("Available in Phase 4")).toBeVisible();
-  await expect(page.getByText("Available in Phase 5")).toHaveCount(2);
+  await expect(page.getByText("Available now")).toHaveCount(3);
+  await expect(page.getByText("Available in Phase 5")).toHaveCount(0);
   await expect(page.getByText("Available in Phase 6")).toBeVisible();
   await expect(
+    page.getByRole("link", { name: "View water log" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "View measurements" }),
+  ).toBeVisible();
+  await expect(
     page.getByText(
-      "Your activity history will appear here once workout and health tracking are available.",
+      "Your workout history will appear here after you log a workout.",
     ),
   ).toBeVisible();
 });

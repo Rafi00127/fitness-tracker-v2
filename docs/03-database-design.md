@@ -69,105 +69,98 @@ Rules:
 
 Purpose: stores reusable exercise definitions.
 
-Likely fields:
+Phase 4 implementation:
 
-- id
+- id (cuid primary key)
 - userId
 - name
-- category (e.g. cardio, strength, mobility)
-- notes
+- category (optional free-text label)
+- notes (optional)
 - createdAt
 - updatedAt
 
 Rules:
 
-- user-owned exercise catalog
-- names may need uniqueness within the user scope
+- exercises are private and owned by one user
+- names are trimmed and required; duplicate names are allowed because no uniqueness rule is specified
+- deleting an exercise referenced by a workout entry is restricted so workout history is preserved
 
 ### Workout
 
 Purpose: records a workout session.
 
-Likely fields:
+Phase 4 implementation:
 
-- id
+- id (cuid primary key)
 - userId
 - title
 - date
-- durationMinutes
-- notes
+- durationMinutes (optional)
+- notes (optional)
 - createdAt
 - updatedAt
 
 Rules:
 
 - workouts belong to one user
-- timestamps must be stored consistently
+- workout date is stored as a timestamp; timestamps use UTC at the API boundary
+- deleting a workout cascades to its workout exercise entries
 
 ### WorkoutExercise
 
 Purpose: maps exercises to workout sessions and records session details.
 
-Likely fields:
+Phase 4 implementation:
 
-- id
+- id (cuid primary key)
 - workoutId
 - exerciseId
-- sets
-- reps
-- weight
-- durationSeconds
-- notes
+- sets (optional)
+- reps (optional)
+- weight (optional decimal)
+- durationSeconds (optional)
+- notes (optional)
 - createdAt
 - updatedAt
 
 Rules:
 
-- exercise and workout must belong to the same user or enforce ownership at the application layer
-- relationship must be explicit
+- each entry links one workout and one exercise
+- the API verifies that both records belong to the authenticated user before linking them
+- deleting a referenced exercise is restricted to retain historical workout details
 
 ### WaterEntry
 
-Purpose: stores daily fluid intake records.
+Purpose: stores the user's daily fluid intake total.
 
-Likely fields:
+Phase 5 implementation:
 
-- id
-- userId
-- date
-- amountMl
-- notes
-- createdAt
-- updatedAt
+- `id` (cuid primary key), `userId`, calendar `date`, `amountMl`, optional `notes`, `createdAt`, and `updatedAt`
+- `date` is a date-only value; the API uses `YYYY-MM-DD`
+- intake is stored as a positive integer number of milliliters
 
 Rules:
 
-- unique constraints may apply to daily entries depending on desired behavior
-- data must support trend tracking over time
+- one daily total per user and date; update that record instead of creating a second daily record
+- water data is private and owner-scoped
+- range summaries are calculated from the persisted daily totals
 
 ### Measurement
 
 Purpose: records body measurements over time.
 
-Likely fields:
+Phase 5 implementation:
 
-- id
-- userId
-- date
-- weightKg
-- waistCm
-- chestCm
-- hipCm
-- bicepsCm
-- bodyFatPercent
-- notes
-- createdAt
-- updatedAt
+- `id` (cuid primary key), `userId`, calendar `date`, optional `weightKg`, `waistCm`, `chestCm`, `hipCm`, `bicepsCm`, `bodyFatPercent`, optional `notes`, `createdAt`, and `updatedAt`
+- weight is stored canonically in kilograms; length values in centimeters
+- weight uses three decimal places to reduce unit-conversion drift; other values use two decimal places, and body-fat percentage is from 0 through 100
 
 Rules:
 
 - measurement values should be nullable where not always applicable
 - historical tracking should be preserved
+- a snapshot must contain at least one measurement value; multiple snapshots on one date are allowed
+- records are private and owner-scoped
 
 ### Goal
 
@@ -334,8 +327,44 @@ Use Prisma conventions consistent with the project’s direction:
 - keep Prisma models aligned with API contracts
 - generate migration files rather than editing production schema directly
 
-## 12. Current Assumptions
+## 12. Phase 4 and Phase 5 Scope and Assumptions
+
+The Phase 4 Prisma schema adds `Exercise`, `Workout`, and `WorkoutExercise`. The Phase 5 schema adds `WaterEntry` and `Measurement`; goals, charts, nutrition, plans, social, and AI models remain later work.
+
+The API limits a workout to 50 exercise entries per create/update request to bound nested writes.
+
+Open Decision:
+Question: Should exercise names be unique per user, and should exercises have a fixed category taxonomy?
+Why it matters: Both choices affect validation and how users reuse the exercise catalog.
+Current assumption: Names may repeat and category remains optional free text; no supported requirement defines uniqueness or a controlled list.
+Impact: The API allows the user to manage exercises without a taxonomy migration when requirements become clearer.
+
+Open Decision:
+Question: What should happen when deleting an exercise used by an existing workout?
+Why it matters: Cascading deletion could erase the meaning of workout history.
+Current assumption: Restrict deletion while workout entries reference the exercise.
+Impact: The API returns a conflict and preserves existing workout records.
+
+Open Decision:
+Question: How should workout edits change their associated exercise entries?
+Why it matters: Partial child-list mutation semantics can be ambiguous.
+Current assumption: If `exerciseEntries` is supplied in a workout PATCH, it replaces the workout's complete entry list atomically; if omitted, entries are unchanged.
+Impact: Clients can submit a complete, deterministic workout update without separate entry endpoints.
+
+Open Decision:
+Question: Should daily water intake support multiple drink events or a single daily total?
+Why it matters: Multiple events require additional entry timestamps and aggregation behavior.
+Current assumption: Store one editable total per user-selected calendar day, in milliliters.
+Impact: The unique user/date key prevents duplicate daily totals; finer-grained drink events remain out of scope.
+
+Open Decision:
+Question: Which measurement units and fields should be presented to users?
+Why it matters: Units affect storage, validation, comparison, and display.
+Current assumption: Use the measurement fields already listed in this document, store weight in kilograms and body dimensions in centimeters, and convert weight for display/input using the profile preference.
+Impact: Users can record only applicable metrics; a snapshot needs at least one value. Measurements are date-only, multiple snapshots per day are allowed, and charting remains Phase 6.
+
+## 13. Current Assumptions
 
 This database design is intentionally conservative. It supports the core fitness-tracking MVP and keeps optional social or AI features out of the schema until they are required.
 
-Later conceptual entities in this document are not implemented by Phase 3. The current Prisma schema contains `User`, `RefreshToken`, and `Profile`; workout, water, measurement, goal, nutrition, and plan models remain future phase work.
+The current Prisma schema contains `User`, `RefreshToken`, `Profile`, `Exercise`, `Workout`, `WorkoutExercise`, `WaterEntry`, and `Measurement`. Goals, nutrition, and plan models remain future phase work.

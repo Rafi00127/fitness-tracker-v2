@@ -14,6 +14,7 @@ describe('DashboardService', () => {
           name: null,
           createdAt: new Date('2026-01-01T00:00:00.000Z'),
           profile: { heightCm: null, weightUnit: 'KG' },
+          workouts: [],
         }),
       },
     };
@@ -29,9 +30,9 @@ describe('DashboardService', () => {
     expect(summary.profileComplete).toBe(false);
     expect(summary.recentActivity).toEqual([]);
     expect(summary.trackingModules).toEqual([
-      { key: 'workouts', available: false, plannedPhase: 4 },
-      { key: 'water', available: false, plannedPhase: 5 },
-      { key: 'measurements', available: false, plannedPhase: 5 },
+      { key: 'workouts', available: true, plannedPhase: 4 },
+      { key: 'water', available: true, plannedPhase: 5 },
+      { key: 'measurements', available: true, plannedPhase: 5 },
       { key: 'goals', available: false, plannedPhase: 6 },
     ]);
   });

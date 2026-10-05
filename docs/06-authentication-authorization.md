@@ -140,3 +140,16 @@ The backend is the single source of truth for access decisions.
 - The profile and dashboard owner is always derived from the verified token subject; the client cannot select another user by submitting an ID.
 - Registration creates the initial profile in the same database transaction as the user.
 - The profile migration backfills existing users before Phase 3 profile reads are served.
+
+## 16. Phase 4 Workout and Exercise Access
+
+- Every exercise and workout route requires the access-token guard.
+- Reads and mutations are scoped to the verified token subject; the API does not accept an owner ID as proof of access.
+- Workout exercise references are validated against the same authenticated owner before create or update.
+- Exercise deletion is rejected while its workout history references it; workout deletion removes its own entries.
+
+## 17. Phase 5 Water and Measurement Access
+
+- Every water and measurement endpoint requires the access-token guard.
+- Reads and writes are scoped to the verified token subject; user IDs are not accepted from clients.
+- Date-range filtering, totals, and record comparisons operate only on that user's records.

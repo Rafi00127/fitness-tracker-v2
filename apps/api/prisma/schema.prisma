@@ -16,6 +16,10 @@ model User {
   updatedAt     DateTime       @updatedAt
   refreshTokens RefreshToken[]
   profile       Profile?
+  exercises     Exercise[]
+  workouts      Workout[]
+  waterEntries  WaterEntry[]
+  measurements  Measurement[]
 }
 
 model RefreshToken {
@@ -37,6 +41,84 @@ model Profile {
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Exercise {
+  id             String            @id @default(cuid())
+  userId         String
+  name           String            @db.VarChar(100)
+  category       String?           @db.VarChar(60)
+  notes          String?           @db.VarChar(1000)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workoutEntries WorkoutExercise[]
+
+  @@index([userId, name])
+}
+
+model Workout {
+  id              String            @id @default(cuid())
+  userId          String
+  title           String            @db.VarChar(120)
+  date            DateTime
+  durationMinutes Int?
+  notes           String?           @db.VarChar(2000)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exerciseEntries WorkoutExercise[]
+
+  @@index([userId, date])
+}
+
+model WorkoutExercise {
+  id              String   @id @default(cuid())
+  workoutId       String
+  exerciseId      String
+  sets            Int?
+  reps            Int?
+  weight          Decimal? @db.Decimal(7, 2)
+  durationSeconds Int?
+  notes           String?  @db.VarChar(1000)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  workout         Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  exercise        Exercise @relation(fields: [exerciseId], references: [id], onDelete: Restrict)
+
+  @@index([workoutId])
+  @@index([exerciseId])
+}
+
+model WaterEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime @db.Date
+  amountMl  Int
+  notes     String?  @db.VarChar(1000)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+}
+
+model Measurement {
+  id             String   @id @default(cuid())
+  userId         String
+  date           DateTime @db.Date
+  weightKg       Decimal? @db.Decimal(7, 3)
+  waistCm        Decimal? @db.Decimal(7, 2)
+  chestCm        Decimal? @db.Decimal(7, 2)
+  hipCm          Decimal? @db.Decimal(7, 2)
+  bicepsCm       Decimal? @db.Decimal(7, 2)
+  bodyFatPercent Decimal? @db.Decimal(5, 2)
+  notes          String?  @db.VarChar(1000)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
 }
 
 enum WeightUnit {

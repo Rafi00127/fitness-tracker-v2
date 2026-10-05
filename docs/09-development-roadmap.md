@@ -88,6 +88,8 @@ Exit gate:
 
 ## 5. Phase 4 — Workouts / Exercises
 
+Status: implemented and validated against the local Docker Compose PostgreSQL/API stack. Production rollout remains subject to normal deployment review.
+
 Objective:
 - enable workout logging and exercise tracking
 
@@ -103,15 +105,23 @@ Dependencies:
 Acceptance criteria:
 - users can create logs and view their history
 - workout records are associated with the correct user account
+- users can manage their private exercise catalog
+- workouts can include multiple exercise entries with optional session details
+- users can view, edit, and delete workouts without losing unrelated users' data
+- dashboard shows recent workout history while later tracking summaries remain unavailable
 
 Validation:
-- integration tests for workout persistence
-- Playwright flow for creating workouts
+- unit/API tests cover persistence rules, validation, ownership, and CRUD behavior
+- database migration is applied and verified against local PostgreSQL
+- live API smoke test covers registration, exercise and workout CRUD, ownership-linked records, and history-preserving exercise deletion
+- Playwright covers exercise creation and a workout create/history/detail flow
 
 Exit gate:
 - workout tracking must be validated before later health metrics are built on top of it
 
 ## 6. Phase 5 — Water / Measurements
+
+Status: implemented and validated against local PostgreSQL and the Docker Compose application stack.
 
 Objective:
 - capture daily health and body metrics
@@ -127,9 +137,14 @@ Dependencies:
 Acceptance criteria:
 - users can record daily water intake and measurements
 - metrics can be reviewed over time
+- daily water intake is summarized for a selected date range
+- latest measurement values can be compared with the previous snapshot
+- water and measurement records remain private to the authenticated user
 
 Validation:
-- API and frontend validation for measurement flows
+- authenticated API tests cover ownership, validation, date filtering, and CRUD
+- Playwright covers water logging/range totals and measurement entry/comparison
+- migration is applied to local PostgreSQL and live endpoints are smoke-tested with temporary accounts that are removed afterward
 
 Exit gate:
 - the measurement model must be consistent before advanced charting or goal integration is expanded

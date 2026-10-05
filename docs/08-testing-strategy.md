@@ -109,4 +109,8 @@ Before feature completion and before merging changes, the project should run the
 
 Phase 3 adds API service tests for profile ownership-scoped lookups/updates and dashboard summary behavior, plus API endpoint tests for authentication, validation, and authenticated user scoping. Playwright covers signed-out dashboard redirection, dashboard empty/future-phase states, and profile editing. The API tests mock persistence and browser tests intercept the API; neither requires a running PostgreSQL instance. Prisma schema validation does not require a live database, but applying the profile backfill migration requires PostgreSQL.
 
-The Phase 3 migration and live service flow were also smoke-tested against the local Docker Compose PostgreSQL/API stack using a temporary account that was removed after verification.
+Phase 3's migration and live service flow were also smoke-tested against the local Docker Compose PostgreSQL/API stack using a temporary account that was removed after verification.
+
+Phase 4 adds service and endpoint coverage for workout/exercise CRUD, validation, nested exercise ownership, date filtering, and delete behavior. Playwright covers exercise creation and a workout create/history/detail journey. Persistence integration tests use the local Compose database only with temporary test accounts/records that are deleted by the test; unit/API tests mock persistence. Never reset the development or production database to prepare test fixtures.
+
+Phase 5 adds service and authenticated endpoint coverage for daily water totals, measurement snapshots, date filters, validation, and owner scoping. Playwright covers water create/update/delete and range summaries, plus measurement entry, profile-unit conversion, history, and comparison. Migration deployment and live API smoke tests use the local Compose PostgreSQL stack and temporary account data that is removed after each run; do not reset the database.

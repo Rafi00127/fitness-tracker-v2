@@ -18,6 +18,21 @@ export class DashboardService {
             weightUnit: true,
           },
         },
+        workouts: {
+          orderBy: [{ date: 'desc' }, { createdAt: 'desc' }],
+          take: 5,
+          select: {
+            id: true,
+            title: true,
+            date: true,
+            durationMinutes: true,
+            exerciseEntries: {
+              select: {
+                exercise: { select: { name: true } },
+              },
+            },
+          },
+        },
       },
     });
 
@@ -32,11 +47,17 @@ export class DashboardService {
         user.name.trim().length > 0 &&
         user.profile?.heightCm !== null &&
         user.profile?.heightCm !== undefined,
-      recentActivity: [],
+      recentActivity: user.workouts.map((workout) => ({
+        id: workout.id,
+        title: workout.title,
+        date: workout.date,
+        durationMinutes: workout.durationMinutes,
+        exercises: workout.exerciseEntries.map((entry) => entry.exercise.name),
+      })),
       trackingModules: [
-        { key: 'workouts', available: false, plannedPhase: 4 },
-        { key: 'water', available: false, plannedPhase: 5 },
-        { key: 'measurements', available: false, plannedPhase: 5 },
+        { key: 'workouts', available: true, plannedPhase: 4 },
+        { key: 'water', available: true, plannedPhase: 5 },
+        { key: 'measurements', available: true, plannedPhase: 5 },
         { key: 'goals', available: false, plannedPhase: 6 },
       ],
     };

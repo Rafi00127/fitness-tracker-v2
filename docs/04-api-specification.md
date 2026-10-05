@@ -91,7 +91,7 @@ Implemented Phase 3 endpoints:
 
 - `GET /api/v1/profiles/me` — returns the authenticated account and profile.
 - `PATCH /api/v1/profiles/me` — updates the display name, optional height, and weight-unit preference.
-- `GET /api/v1/dashboard/summary` — returns the authenticated account/profile overview, an empty recent-activity list, and explicit future-phase availability for tracking modules.
+- `GET /api/v1/dashboard/summary` — returns the authenticated account/profile overview, up to five most recent workouts, and availability for current/future tracking modules.
 
 All three endpoints require a valid access-token bearer header. Ownership is derived from the verified token subject; these routes accept no user ID from the client.
 
@@ -107,41 +107,59 @@ Profile update fields are optional:
 
 `name` may be `null` or an empty/whitespace string to clear it. `heightCm` may be `null` to clear it and otherwise must be between 30 and 300 cm. `weightUnit` is `KG` or `LB`. Unrecognized fields are rejected.
 
-The dashboard currently reports `workouts` for Phase 4, `water` and `measurements` for Phase 5, and `goals` for Phase 6 as unavailable. No future tracking data is fabricated. Profile and dashboard payloads use the standard `data` / `meta` success envelope.
+The dashboard reports workout tracking as available and includes up to five most recent workouts. Water and measurements remain planned for Phase 5, and goals for Phase 6. No future tracking data is fabricated. Profile and dashboard payloads use the standard `data` / `meta` success envelope.
 
 For this phase, `profileComplete` means the user has a nonblank display name and a height value. The preferred weight unit has a default and is not required for completion.
 
-## 7. Future Workout and Exercise Endpoints
+## 7. Workouts and Exercises
 
-Likely endpoints:
+Implemented Phase 4 endpoints (all require an access-token bearer header):
 
-- `GET /api/v1/workouts`
-- `POST /api/v1/workouts`
-- `GET /api/v1/workouts/:id`
-- `PATCH /api/v1/workouts/:id`
-- `DELETE /api/v1/workouts/:id`
-- `GET /api/v1/exercises`
-- `POST /api/v1/exercises`
+Exercises:
 
-Requirements:
+- `GET /api/v1/exercises` — list the authenticated user's exercises; supports `q`, `page`, and `limit`.
+- `POST /api/v1/exercises` — create an exercise.
+- `GET /api/v1/exercises/:id` — retrieve an exercise.
+- `PATCH /api/v1/exercises/:id` — update supplied fields.
+- `DELETE /api/v1/exercises/:id` — delete an unused exercise; returns conflict if workout history references it.
 
-- workouts and exercises are owned by the user
-- a workout may include multiple exercise entries
-- response payloads should include relevant nested data only when required
+Workouts:
 
-## 8. Future Water and Measurements Endpoints
+- `GET /api/v1/workouts` — list the authenticated user's workouts; supports `from`, `to`, `page`, and `limit`, ordered newest first.
+- `POST /api/v1/workouts` — create a workout and optional exercise entries atomically.
+- `GET /api/v1/workouts/:id` — retrieve a workout with its exercise entries.
+- `PATCH /api/v1/workouts/:id` — update supplied workout fields. If `exerciseEntries` is included, it replaces the full entry list atomically; if omitted, entries are unchanged.
+- `DELETE /api/v1/workouts/:id` — delete a workout and its entries.
 
-Likely endpoints:
+Exercise create/update fields: `name` (required on create, 1-100 characters), optional `category` (up to 60 characters), and optional `notes` (up to 1000 characters). Names are trimmed; duplicates are allowed. PATCH may use `null` to clear `category` or `notes`; `name` cannot be null.
 
-- `GET /api/v1/water`
-- `POST /api/v1/water`
-- `GET /api/v1/measurements`
-- `POST /api/v1/measurements`
+Workout create fields: `title` (required, 1-120 characters), `date` (ISO-8601 timestamp), optional `durationMinutes` (positive integer), optional `notes` (up to 2000 characters), and optional `exerciseEntries` (maximum 50). An entry has an existing `exerciseId`, plus optional positive integer `sets`, `reps`, and `durationSeconds`, optional `weight` from 0 to 99999.99 (up to two decimal places) in the user's preferred weight unit, and optional `notes` (up to 1000 characters). PATCH fields are optional; `durationMinutes`, `notes`, and optional entry scalar values may be set to `null` to clear them. `title` and `date` cannot be null, and `exerciseEntries` must be an array if supplied. The API rejects duplicate `exerciseId` values within one workout payload.
 
-Requirements:
+List pagination defaults to `page=1` and `limit=20`; `limit` is capped at 100. `from` and `to` are inclusive ISO-8601 timestamp filters. `q` searches exercise name/category. Responses use the standard success envelope; list responses include `meta.pagination`.
 
-- logs are user-specific
-- date-based queries and charts should be supported through filtering
+All lookup and mutation ownership derives from the verified token subject. A workout cannot reference another user's exercise. Water and measurements are implemented in Phase 5; goals, nutrition, and plans remain future work.
+
+## 8. Water and Measurement Endpoints
+
+All routes require an access-token bearer header.
+
+Water:
+
+- `GET /api/v1/water?from=YYYY-MM-DD&to=YYYY-MM-DD&page=1&limit=20` — list daily entries and return `meta.summary.totalMl` for the selected range.
+- `POST /api/v1/water` — create a daily water total with `date`, positive integer `amountMl`, and optional `notes`.
+- `GET /api/v1/water/:id`, `PATCH /api/v1/water/:id`, and `DELETE /api/v1/water/:id` — retrieve or manage an owned daily entry.
+
+There is one entry per user-selected calendar date. Creating a second entry for the same date returns conflict; update the existing entry instead. Date filters are inclusive, date-only values (`YYYY-MM-DD`), and response amounts are in milliliters.
+
+Measurements:
+
+- `GET /api/v1/measurements?from=YYYY-MM-DD&to=YYYY-MM-DD&page=1&limit=20` — list owned measurement snapshots, newest first.
+- `POST /api/v1/measurements` — create a date-only snapshot.
+- `GET /api/v1/measurements/:id`, `PATCH /api/v1/measurements/:id`, and `DELETE /api/v1/measurements/:id` — retrieve or manage an owned snapshot.
+
+Measurement bodies accept optional `weightKg`, `waistCm`, `chestCm`, `hipCm`, `bicepsCm`, `bodyFatPercent`, and `notes`; create requires at least one non-null measurement value. Weight uses three decimal places; other values use two, body fat is 0-100, and dimensions/weight must be positive. PATCH may use `null` to clear values, but the resulting record must retain at least one measurement. Multiple snapshots per date are supported. Weight uses kg in the API and storage; the UI converts to/from the profile's preferred unit. Dates are calendar dates, not timestamps.
+
+Lists use the standard `data` / `meta` envelope with pagination. User ownership is derived from the verified access-token subject. No daily water target or progress goal is implied.
 
 ## 9. Future Goals, Nutrition, and Plans Endpoints
 
@@ -216,4 +234,4 @@ The project intends to document the API explicitly as implementation begins. Dur
 
 ## 16. Current Assumptions
 
-Future endpoints above describe planned domain direction; they are not implemented Phase 3 routes. Add additional endpoint contracts only when the matching roadmap phase is approved.
+The workout edit child-list replacement rule and exercise-delete conflict behavior are conservative Phase 4 choices, not immutable product requirements. Exercise taxonomy and whether duplicates should be forbidden remain open decisions; categories are free text and names may repeat until specified otherwise. Other future endpoints above are planned direction, not implemented routes; add them only when the matching roadmap phase is approved.

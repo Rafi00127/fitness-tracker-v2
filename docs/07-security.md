@@ -117,3 +117,7 @@ The project treats health and fitness records as sensitive personal data. Social
 The Phase 2 refresh cookie is `SameSite=Lax`, scoped to `/api/v1/auth`, and marked `Secure` in production. Access tokens are short-lived (15 minutes) and are sent using the Authorization bearer scheme.
 
 Phase 3 profile and dashboard handlers require the access-token guard and derive ownership from its verified subject. Profile update DTOs validate name, height, and weight-unit values; user IDs are not accepted from the browser for these operations.
+
+Phase 4 exercise and workout handlers use the same guard and owner-scoped persistence. Nested workout exercise IDs are verified as owned by the authenticated user, preventing cross-account references. Deleting a workout cascades only to its own entries; exercise references are restricted to preserve history.
+
+Phase 5 water and measurement handlers also require authentication and scope every read, aggregate, update, and delete to the verified user. The API validates dates and numeric ranges before persistence; health records are not shared across accounts.

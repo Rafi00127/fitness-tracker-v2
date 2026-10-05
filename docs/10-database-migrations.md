@@ -30,6 +30,12 @@ The Phase 2 refresh-token migration hashes existing stored tokens and revokes th
 
 The Phase 3 profile migration creates a one-to-one `Profile` table with a cascading foreign key to `User`, then backfills one default profile row for every existing user. It does not delete or rewrite account data. New registrations create their profile in the same transaction as the user.
 
+The Phase 4 migration adds owner-scoped `Exercise` and `Workout` tables and `WorkoutExercise` join records. Workout deletion cascades to its entries. Exercise deletion is restricted while referenced so historical workouts are not silently damaged. Review this migration before applying it, and never reset a database that may contain user data.
+
+The Phase 4 migration has been applied and verified against the local Docker Compose PostgreSQL database. This does not constitute approval or verification for a production database.
+
+The Phase 5 migration adds owner-cascading `WaterEntry` and `Measurement` tables. Water entries are unique per user-selected calendar date; measurement snapshots may repeat dates. Both tables are indexed by user and date. The migration is additive and does not rewrite or delete existing user data.
+
 ## 4. Production Safety
 
 Production migrations must be treated carefully. Before applying a migration to a production environment, the team should confirm:

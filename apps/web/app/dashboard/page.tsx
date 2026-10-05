@@ -6,7 +6,10 @@ import { getDashboardSummary, type DashboardSummary } from "@/lib/fitness-api";
 import { useAuthSession } from "../auth-session";
 import { ProtectedAppShell } from "../protected-app-shell";
 
-const moduleNames: Record<DashboardSummary["trackingModules"][number]["key"], string> = {
+const moduleNames: Record<
+  DashboardSummary["trackingModules"][number]["key"],
+  string
+> = {
   workouts: "Workouts",
   water: "Water",
   measurements: "Measurements",
@@ -60,7 +63,10 @@ export default function DashboardPage() {
         </p>
 
         {error && (
-          <p className="mt-6 rounded-md bg-red-50 p-4 text-sm text-red-800" role="alert">
+          <p
+            className="mt-6 rounded-md bg-red-50 p-4 text-sm text-red-800"
+            role="alert"
+          >
             {error}
           </p>
         )}
@@ -79,9 +85,13 @@ export default function DashboardPage() {
               </h2>
               <div className="grid gap-4 sm:grid-cols-2">
                 <article className="rounded-xl border border-zinc-200 bg-white p-5">
-                  <h3 className="text-sm font-medium text-zinc-600">Profile setup</h3>
+                  <h3 className="text-sm font-medium text-zinc-600">
+                    Profile setup
+                  </h3>
                   <p className="mt-2 text-xl font-semibold text-zinc-950">
-                    {summary.profileComplete ? "Basics added" : "Needs a few details"}
+                    {summary.profileComplete
+                      ? "Basics added"
+                      : "Needs a few details"}
                   </p>
                   <Link
                     className="mt-3 inline-block text-sm font-medium text-zinc-700 underline underline-offset-4"
@@ -95,17 +105,23 @@ export default function DashboardPage() {
                   <p className="mt-2 break-all text-xl font-semibold text-zinc-950">
                     {summary.user.name || summary.user.email}
                   </p>
-                  <p className="mt-1 text-sm text-zinc-600">{summary.user.email}</p>
+                  <p className="mt-1 text-sm text-zinc-600">
+                    {summary.user.email}
+                  </p>
                 </article>
               </div>
             </section>
 
             <section aria-labelledby="tracking-heading" className="mt-10">
-              <h2 id="tracking-heading" className="text-xl font-semibold text-zinc-950">
+              <h2
+                id="tracking-heading"
+                className="text-xl font-semibold text-zinc-950"
+              >
                 Tracking features
               </h2>
               <p className="mt-1 text-sm text-zinc-600">
-                These summaries will appear as the tracking phases are implemented.
+                Workouts, water, and measurements are ready now; goals will
+                follow in a later phase.
               </p>
               <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {summary.trackingModules.map((item) => (
@@ -117,27 +133,79 @@ export default function DashboardPage() {
                       {moduleNames[item.key]}
                     </h3>
                     <p className="mt-2 text-sm text-zinc-600">
-                      Available in Phase {item.plannedPhase}
+                      {item.available
+                        ? "Available now"
+                        : `Available in Phase ${item.plannedPhase}`}
                     </p>
+                    {item.key === "workouts" && item.available && (
+                      <Link
+                        className="mt-3 inline-block text-sm font-medium text-zinc-700 underline underline-offset-4"
+                        href="/workouts"
+                      >
+                        View workouts
+                      </Link>
+                    )}
+                    {item.key === "water" && item.available && (
+                      <Link
+                        className="mt-3 inline-block text-sm font-medium text-zinc-700 underline underline-offset-4"
+                        href="/water"
+                      >
+                        View water log
+                      </Link>
+                    )}
+                    {item.key === "measurements" && item.available && (
+                      <Link
+                        className="mt-3 inline-block text-sm font-medium text-zinc-700 underline underline-offset-4"
+                        href="/measurements"
+                      >
+                        View measurements
+                      </Link>
+                    )}
                   </article>
                 ))}
               </div>
             </section>
 
             <section aria-labelledby="recent-heading" className="mt-10">
-              <h2 id="recent-heading" className="text-xl font-semibold text-zinc-950">
+              <h2
+                id="recent-heading"
+                className="text-xl font-semibold text-zinc-950"
+              >
                 Recent activity
               </h2>
               <div className="mt-4 rounded-xl border border-dashed border-zinc-300 bg-white p-6">
                 {summary.recentActivity.length === 0 ? (
                   <p className="text-sm text-zinc-600">
-                    Your activity history will appear here once workout and health
-                    tracking are available.
+                    Your workout history will appear here after you log a
+                    workout.
                   </p>
                 ) : (
-                  <ul aria-label="Recent activity">
-                    {summary.recentActivity.map((activity, index) => (
-                      <li key={index}>{JSON.stringify(activity)}</li>
+                  <ul aria-label="Recent activity" className="space-y-3">
+                    {summary.recentActivity.map((activity) => (
+                      <li
+                        className="flex flex-wrap items-start justify-between gap-3 border-b border-zinc-100 pb-3 last:border-0 last:pb-0"
+                        key={activity.id}
+                      >
+                        <div>
+                          <Link
+                            className="font-medium text-zinc-950 underline underline-offset-4"
+                            href={`/workouts/${activity.id}`}
+                          >
+                            {activity.title}
+                          </Link>
+                          <p className="mt-1 text-sm text-zinc-600">
+                            {activity.exercises.length
+                              ? activity.exercises.join(", ")
+                              : "No exercises added"}
+                          </p>
+                        </div>
+                        <time
+                          className="text-sm text-zinc-600"
+                          dateTime={activity.date}
+                        >
+                          {new Date(activity.date).toLocaleDateString()}
+                        </time>
+                      </li>
                     ))}
                   </ul>
                 )}

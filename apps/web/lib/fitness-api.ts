@@ -26,12 +26,122 @@ export interface DashboardSummary {
     } | null;
   };
   profileComplete: boolean;
-  recentActivity: unknown[];
+  recentActivity: Array<{
+    id: string;
+    title: string;
+    date: string;
+    durationMinutes: number | null;
+    exercises: string[];
+  }>;
   trackingModules: Array<{
     key: "workouts" | "water" | "measurements" | "goals";
     available: boolean;
     plannedPhase: number;
   }>;
+}
+
+export interface ExerciseRecord {
+  id: string;
+  name: string;
+  category: string | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WorkoutExerciseRecord {
+  id: string;
+  exerciseId: string;
+  exercise: { id: string; name: string; category: string | null };
+  sets: number | null;
+  reps: number | null;
+  weight: number | null;
+  durationSeconds: number | null;
+  notes: string | null;
+}
+
+export interface WorkoutRecord {
+  id: string;
+  title: string;
+  date: string;
+  durationMinutes: number | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+  exerciseEntries: WorkoutExerciseRecord[];
+}
+
+export interface WaterEntryRecord {
+  id: string;
+  date: string;
+  amountMl: number;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MeasurementRecord {
+  id: string;
+  date: string;
+  weightKg: number | null;
+  waistCm: number | null;
+  chestCm: number | null;
+  hipCm: number | null;
+  bicepsCm: number | null;
+  bodyFatPercent: number | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PaginatedResult<T> {
+  items: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export interface ExerciseInput {
+  name: string;
+  category?: string | null;
+  notes?: string | null;
+}
+
+export interface WorkoutExerciseInput {
+  exerciseId: string;
+  sets?: number | null;
+  reps?: number | null;
+  weight?: number | null;
+  durationSeconds?: number | null;
+  notes?: string | null;
+}
+
+export interface WorkoutInput {
+  title: string;
+  date: string;
+  durationMinutes?: number | null;
+  notes?: string | null;
+  exerciseEntries?: WorkoutExerciseInput[];
+}
+
+export interface WaterInput {
+  date: string;
+  amountMl: number;
+  notes?: string | null;
+}
+
+export interface MeasurementInput {
+  date: string;
+  weightKg?: number | null;
+  waistCm?: number | null;
+  chestCm?: number | null;
+  hipCm?: number | null;
+  bicepsCm?: number | null;
+  bodyFatPercent?: number | null;
+  notes?: string | null;
 }
 
 export async function getProfile(session: AuthSession): Promise<ProfileData> {
@@ -73,11 +183,332 @@ export async function getDashboardSummary(
   return data;
 }
 
+export async function getExercises(
+  session: AuthSession,
+  options: { q?: string; page?: number; limit?: number } = {},
+): Promise<PaginatedResult<ExerciseRecord>> {
+  const query = new URLSearchParams();
+  if (options.q) query.set("q", options.q);
+  query.set("page", String(options.page ?? 1));
+  query.set("limit", String(options.limit ?? 20));
+  const response = await requestEnvelope(
+    `/exercises?${query.toString()}`,
+    session.accessToken,
+  );
+  if (
+    !Array.isArray(response.data) ||
+    !response.data.every(isExerciseRecord) ||
+    !isPagination(response.meta.pagination)
+  ) {
+    throw new Error("The exercise service returned an invalid response.");
+  }
+
+  return { items: response.data, pagination: response.meta.pagination };
+}
+
+export async function createExercise(
+  session: AuthSession,
+  input: ExerciseInput,
+): Promise<ExerciseRecord> {
+  const data = await requestData("/exercises", session.accessToken, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+  if (!isExerciseRecord(data)) {
+    throw new Error("The exercise service returned an invalid response.");
+  }
+
+  return data;
+}
+
+export async function updateExercise(
+  session: AuthSession,
+  exerciseId: string,
+  input: Partial<ExerciseInput>,
+): Promise<ExerciseRecord> {
+  const data = await requestData(
+    `/exercises/${encodeURIComponent(exerciseId)}`,
+    session.accessToken,
+    { method: "PATCH", body: JSON.stringify(input) },
+  );
+  if (!isExerciseRecord(data)) {
+    throw new Error("The exercise service returned an invalid response.");
+  }
+
+  return data;
+}
+
+export async function deleteExercise(
+  session: AuthSession,
+  exerciseId: string,
+): Promise<void> {
+  const data = await requestData(
+    `/exercises/${encodeURIComponent(exerciseId)}`,
+    session.accessToken,
+    { method: "DELETE" },
+  );
+  if (!isRecord(data) || data.success !== true) {
+    throw new Error("The exercise service returned an invalid response.");
+  }
+}
+
+export async function getWorkouts(
+  session: AuthSession,
+  options: {
+    from?: string;
+    to?: string;
+    page?: number;
+    limit?: number;
+  } = {},
+): Promise<PaginatedResult<WorkoutRecord>> {
+  const query = new URLSearchParams();
+  if (options.from) query.set("from", options.from);
+  if (options.to) query.set("to", options.to);
+  query.set("page", String(options.page ?? 1));
+  query.set("limit", String(options.limit ?? 20));
+  const response = await requestEnvelope(
+    `/workouts?${query.toString()}`,
+    session.accessToken,
+  );
+  if (
+    !Array.isArray(response.data) ||
+    !response.data.every(isWorkoutRecord) ||
+    !isPagination(response.meta.pagination)
+  ) {
+    throw new Error("The workout service returned an invalid response.");
+  }
+
+  return { items: response.data, pagination: response.meta.pagination };
+}
+
+export async function getWorkout(
+  session: AuthSession,
+  workoutId: string,
+): Promise<WorkoutRecord> {
+  const data = await requestData(
+    `/workouts/${encodeURIComponent(workoutId)}`,
+    session.accessToken,
+  );
+  if (!isWorkoutRecord(data)) {
+    throw new Error("The workout service returned an invalid response.");
+  }
+
+  return data;
+}
+
+export async function createWorkout(
+  session: AuthSession,
+  input: WorkoutInput,
+): Promise<WorkoutRecord> {
+  const data = await requestData("/workouts", session.accessToken, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+  if (!isWorkoutRecord(data)) {
+    throw new Error("The workout service returned an invalid response.");
+  }
+
+  return data;
+}
+
+export async function updateWorkout(
+  session: AuthSession,
+  workoutId: string,
+  input: WorkoutInput,
+): Promise<WorkoutRecord> {
+  const data = await requestData(
+    `/workouts/${encodeURIComponent(workoutId)}`,
+    session.accessToken,
+    { method: "PATCH", body: JSON.stringify(input) },
+  );
+  if (!isWorkoutRecord(data)) {
+    throw new Error("The workout service returned an invalid response.");
+  }
+
+  return data;
+}
+
+export async function deleteWorkout(
+  session: AuthSession,
+  workoutId: string,
+): Promise<void> {
+  const data = await requestData(
+    `/workouts/${encodeURIComponent(workoutId)}`,
+    session.accessToken,
+    { method: "DELETE" },
+  );
+  if (!isRecord(data) || data.success !== true) {
+    throw new Error("The workout service returned an invalid response.");
+  }
+}
+
+export async function getWaterEntries(
+  session: AuthSession,
+  options: {
+    from?: string;
+    to?: string;
+    page?: number;
+    limit?: number;
+  } = {},
+): Promise<PaginatedResult<WaterEntryRecord> & { totalMl: number }> {
+  const query = new URLSearchParams();
+  if (options.from) query.set("from", options.from);
+  if (options.to) query.set("to", options.to);
+  query.set("page", String(options.page ?? 1));
+  query.set("limit", String(options.limit ?? 20));
+  const response = await requestEnvelope(
+    `/water?${query.toString()}`,
+    session.accessToken,
+  );
+  const totalMl = isRecord(response.meta.summary)
+    ? response.meta.summary.totalMl
+    : null;
+  if (
+    !Array.isArray(response.data) ||
+    !response.data.every(isWaterEntryRecord) ||
+    !isPagination(response.meta.pagination) ||
+    typeof totalMl !== "number" ||
+    !Number.isInteger(totalMl)
+  ) {
+    throw new Error("The water service returned an invalid response.");
+  }
+
+  return {
+    items: response.data,
+    pagination: response.meta.pagination,
+    totalMl,
+  };
+}
+
+export async function createWaterEntry(
+  session: AuthSession,
+  input: WaterInput,
+): Promise<WaterEntryRecord> {
+  const data = await requestData("/water", session.accessToken, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+  if (!isWaterEntryRecord(data)) {
+    throw new Error("The water service returned an invalid response.");
+  }
+  return data;
+}
+
+export async function updateWaterEntry(
+  session: AuthSession,
+  entryId: string,
+  input: Partial<WaterInput>,
+): Promise<WaterEntryRecord> {
+  const data = await requestData(
+    `/water/${encodeURIComponent(entryId)}`,
+    session.accessToken,
+    { method: "PATCH", body: JSON.stringify(input) },
+  );
+  if (!isWaterEntryRecord(data)) {
+    throw new Error("The water service returned an invalid response.");
+  }
+  return data;
+}
+
+export async function deleteWaterEntry(
+  session: AuthSession,
+  entryId: string,
+): Promise<void> {
+  const data = await requestData(
+    `/water/${encodeURIComponent(entryId)}`,
+    session.accessToken,
+    { method: "DELETE" },
+  );
+  if (!isRecord(data) || data.success !== true) {
+    throw new Error("The water service returned an invalid response.");
+  }
+}
+
+export async function getMeasurements(
+  session: AuthSession,
+  options: {
+    from?: string;
+    to?: string;
+    page?: number;
+    limit?: number;
+  } = {},
+): Promise<PaginatedResult<MeasurementRecord>> {
+  const query = new URLSearchParams();
+  if (options.from) query.set("from", options.from);
+  if (options.to) query.set("to", options.to);
+  query.set("page", String(options.page ?? 1));
+  query.set("limit", String(options.limit ?? 20));
+  const response = await requestEnvelope(
+    `/measurements?${query.toString()}`,
+    session.accessToken,
+  );
+  if (
+    !Array.isArray(response.data) ||
+    !response.data.every(isMeasurementRecord) ||
+    !isPagination(response.meta.pagination)
+  ) {
+    throw new Error("The measurements service returned an invalid response.");
+  }
+  return { items: response.data, pagination: response.meta.pagination };
+}
+
+export async function createMeasurement(
+  session: AuthSession,
+  input: MeasurementInput,
+): Promise<MeasurementRecord> {
+  const data = await requestData("/measurements", session.accessToken, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+  if (!isMeasurementRecord(data)) {
+    throw new Error("The measurements service returned an invalid response.");
+  }
+  return data;
+}
+
+export async function updateMeasurement(
+  session: AuthSession,
+  measurementId: string,
+  input: Partial<MeasurementInput>,
+): Promise<MeasurementRecord> {
+  const data = await requestData(
+    `/measurements/${encodeURIComponent(measurementId)}`,
+    session.accessToken,
+    { method: "PATCH", body: JSON.stringify(input) },
+  );
+  if (!isMeasurementRecord(data)) {
+    throw new Error("The measurements service returned an invalid response.");
+  }
+  return data;
+}
+
+export async function deleteMeasurement(
+  session: AuthSession,
+  measurementId: string,
+): Promise<void> {
+  const data = await requestData(
+    `/measurements/${encodeURIComponent(measurementId)}`,
+    session.accessToken,
+    { method: "DELETE" },
+  );
+  if (!isRecord(data) || data.success !== true) {
+    throw new Error("The measurements service returned an invalid response.");
+  }
+}
+
 async function requestData(
   endpoint: string,
   accessToken: string,
-  options: { method?: "GET" | "PATCH"; body?: string } = {},
+  options: { method?: "GET" | "POST" | "PATCH" | "DELETE"; body?: string } = {},
 ): Promise<unknown> {
+  return (await requestEnvelope(endpoint, accessToken, options)).data;
+}
+
+async function requestEnvelope(
+  endpoint: string,
+  accessToken: string,
+  options: { method?: "GET" | "POST" | "PATCH" | "DELETE"; body?: string } = {},
+): Promise<{ data: unknown; meta: Record<string, unknown> }> {
   let response: Response;
   try {
     response = await fetch(`/api/v1${endpoint}`, {
@@ -112,11 +543,11 @@ async function requestData(
     throw new Error(message);
   }
 
-  if (!isRecord(payload) || !("data" in payload)) {
+  if (!isRecord(payload) || !("data" in payload) || !isRecord(payload.meta)) {
     throw new Error("The fitness service returned an invalid response.");
   }
 
-  return payload.data;
+  return { data: payload.data, meta: payload.meta };
 }
 
 function isWeightUnit(value: unknown): value is WeightUnit {
@@ -153,6 +584,17 @@ function isDashboardSummary(value: unknown): value is DashboardSummary {
         isWeightUnit(value.user.profile.weightUnit))) &&
     typeof value.profileComplete === "boolean" &&
     Array.isArray(value.recentActivity) &&
+    value.recentActivity.every(
+      (activity) =>
+        isRecord(activity) &&
+        typeof activity.id === "string" &&
+        typeof activity.title === "string" &&
+        typeof activity.date === "string" &&
+        (typeof activity.durationMinutes === "number" ||
+          activity.durationMinutes === null) &&
+        Array.isArray(activity.exercises) &&
+        activity.exercises.every((exercise) => typeof exercise === "string"),
+    ) &&
     Array.isArray(value.trackingModules) &&
     value.trackingModules.every(
       (module) =>
@@ -177,4 +619,95 @@ function isTrackingModuleKey(
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
+}
+
+function isExerciseRecord(value: unknown): value is ExerciseRecord {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.name === "string" &&
+    (typeof value.category === "string" || value.category === null) &&
+    (typeof value.notes === "string" || value.notes === null) &&
+    typeof value.createdAt === "string" &&
+    typeof value.updatedAt === "string"
+  );
+}
+
+function isWorkoutExerciseRecord(
+  value: unknown,
+): value is WorkoutExerciseRecord {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.exerciseId === "string" &&
+    isRecord(value.exercise) &&
+    typeof value.exercise.id === "string" &&
+    typeof value.exercise.name === "string" &&
+    (typeof value.exercise.category === "string" ||
+      value.exercise.category === null) &&
+    isNullableNumber(value.sets) &&
+    isNullableNumber(value.reps) &&
+    isNullableNumber(value.weight) &&
+    isNullableNumber(value.durationSeconds) &&
+    (typeof value.notes === "string" || value.notes === null)
+  );
+}
+
+function isWorkoutRecord(value: unknown): value is WorkoutRecord {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.title === "string" &&
+    typeof value.date === "string" &&
+    isNullableNumber(value.durationMinutes) &&
+    (typeof value.notes === "string" || value.notes === null) &&
+    typeof value.createdAt === "string" &&
+    typeof value.updatedAt === "string" &&
+    Array.isArray(value.exerciseEntries) &&
+    value.exerciseEntries.every(isWorkoutExerciseRecord)
+  );
+}
+
+function isWaterEntryRecord(value: unknown): value is WaterEntryRecord {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.date === "string" &&
+    Number.isInteger(value.amountMl) &&
+    typeof value.createdAt === "string" &&
+    typeof value.updatedAt === "string" &&
+    (typeof value.notes === "string" || value.notes === null)
+  );
+}
+
+function isMeasurementRecord(value: unknown): value is MeasurementRecord {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.date === "string" &&
+    ["weightKg", "waistCm", "chestCm", "hipCm", "bicepsCm", "bodyFatPercent"].every(
+      (field) => isNullableNumber(value[field]),
+    ) &&
+    (typeof value.notes === "string" || value.notes === null) &&
+    typeof value.createdAt === "string" &&
+    typeof value.updatedAt === "string"
+  );
+}
+
+function isNullableNumber(value: unknown): value is number | null {
+  return (
+    value === null || (typeof value === "number" && Number.isFinite(value))
+  );
+}
+
+function isPagination(
+  value: unknown,
+): value is PaginatedResult<unknown>["pagination"] {
+  return (
+    isRecord(value) &&
+    Number.isInteger(value.page) &&
+    Number.isInteger(value.limit) &&
+    Number.isInteger(value.total) &&
+    Number.isInteger(value.totalPages)
+  );
 }

@@ -3,11 +3,24 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { ExercisesModule } from './exercises/exercises.module';
 import { ProfilesModule } from './profiles/profiles.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { WorkoutsModule } from './workouts/workouts.module';
+import { MeasurementsModule } from './measurements/measurements.module';
+import { WaterModule } from './water/water.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, ProfilesModule, DashboardModule],
+  imports: [
+    PrismaModule,
+    AuthModule,
+    ProfilesModule,
+    DashboardModule,
+    ExercisesModule,
+    WorkoutsModule,
+    WaterModule,
+    MeasurementsModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
