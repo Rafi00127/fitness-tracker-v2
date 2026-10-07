@@ -221,7 +221,8 @@ Exit gate:
 ## 9. Phase 8 — Plans / Scheduling
 
 Status:
-- implementation in progress
+- feature implementation and automated validation complete; local PostgreSQL
+  migration and integrated-stack verification remain pending
 
 Objective:
 - support lightweight training plans and schedule tracking

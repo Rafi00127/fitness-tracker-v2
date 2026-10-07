@@ -4,6 +4,7 @@ export default defineConfig({
   testDir: "./tests",
   fullyParallel: false,
   reporter: "list",
+  workers: 1,
   use: {
     ...devices["Desktop Chrome"],
     baseURL: "http://127.0.0.1:3100",

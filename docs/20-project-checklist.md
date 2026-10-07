@@ -133,13 +133,13 @@
 
 ## 19. Phase 8 — Plans / Scheduling
 
-- [ ] add owner-scoped Plan and date-only PlanItem models and additive migration
-- [ ] implement authenticated plan and nested schedule-item CRUD
-- [ ] enforce owner-validated optional workout links and single-item linkage
-- [ ] support manual completion and upcoming/history schedule queries
-- [ ] build responsive plan management and schedule review UI
-- [ ] add service, API validation/ownership, and Playwright coverage
-- [ ] update product, architecture, database, API, UI, security, testing,
+- [x] add owner-scoped Plan and date-only PlanItem models and additive migration
+- [x] implement authenticated plan and nested schedule-item CRUD
+- [x] enforce owner-validated optional workout links and single-item linkage
+- [x] support manual completion and upcoming/history schedule queries
+- [x] build responsive plan management and schedule review UI
+- [x] add service, API validation/ownership, and Playwright coverage
+- [x] update product, architecture, database, API, UI, security, testing,
       migration, roadmap, and README documentation
 - [ ] apply migration to local PostgreSQL and validate the integrated stack
 

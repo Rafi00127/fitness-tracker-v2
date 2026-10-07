@@ -91,14 +91,17 @@ Key documents:
 
 ## Current Implementation Status
 
-Phases 1-7 are implemented and validated locally. Phase 6 adds private goals
+Phases 1-8 feature implementation and automated validation are complete. Phase
+8's local PostgreSQL migration and integrated-stack verification remain to be
+confirmed. Phase 6 adds private goals
 for daily water, weekly workouts, and target body weight, with progress derived
 from existing records and accessible history charts. Phase 7 adds private,
 manual nutrition entries and date-range summaries based only on values users
 recorded.
 
 The workouts/exercises, water/measurements, goals, and nutrition migrations
-are applied to the local PostgreSQL database. Phase 7 does not estimate
+are applied to the local PostgreSQL database. Phase 8's plan migration should
+be applied and verified separately. Phase 7 does not estimate
 missing nutrient values or include a food catalog or diet advice. The web app
 and API run at `http://localhost:3000` and `http://localhost:3001`.
 After signing in, open `http://localhost:3000/nutrition` to log meals and
@@ -111,7 +114,7 @@ npm run db:generate
 npx prisma migrate deploy --schema apps/api/prisma/schema.prisma
 ```
 
-Run the web and API apps with `npm run dev:web` and `npm run dev:api`. The browser calls same-origin `/api/v1` routes, which Next.js proxies to the API using `API_INTERNAL_URL` (defaults to `http://localhost:3001`). API unit/endpoint tests mock persistence and Playwright tests mock API responses; these checks do not require PostgreSQL. Applying the profile, workouts, water, measurements, goals, and nutrition migrations requires PostgreSQL.
+Run the web and API apps with `npm run dev:web` and `npm run dev:api`. The browser calls same-origin `/api/v1` routes, which Next.js proxies to the API using `API_INTERNAL_URL` (defaults to `http://localhost:3001`). API unit/endpoint tests mock persistence and Playwright tests mock API responses; these checks do not require PostgreSQL. Applying the profile, workouts, water, measurements, goals, nutrition, and plans migrations requires PostgreSQL.
 
 ## Environment Setup
 
@@ -163,7 +166,7 @@ See [docs/06-authentication-authorization.md](./docs/06-authentication-authoriza
 
 ## Roadmap Summary
 
-The project roadmap begins with foundational setup and proceeds through authentication, profile/dashboard, workouts and exercises, water and measurements, goals and charts, nutrition, plans and scheduling, then optional social and AI/device integrations. Phase 8 plans and scheduling are being implemented as a later phase and are not an initial MVP requirement.
+The project roadmap begins with foundational setup and proceeds through authentication, profile/dashboard, workouts and exercises, water and measurements, goals and charts, nutrition, plans and scheduling, then optional social and AI/device integrations. Phase 8 plans and scheduling are implemented as a later phase and are not an initial MVP requirement.
 
 This is intentionally staged so later phases do not become MVP requirements. The full roadmap is documented in [docs/09-development-roadmap.md](./docs/09-development-roadmap.md).
 
@@ -182,14 +185,16 @@ This project documentation uses a conservative approach when details are not yet
 
 ## Validation Status
 
-Phases 1-7 are implemented and validated. Phase 8 — Plans / Scheduling is in
-progress. It is scoped to private training plans, date-only scheduled
-sessions, manual completion or optional links to logged workouts, and
-upcoming/history review. Nutrition records remain manually entered and
-owner-private, with no estimates, food catalog, or diet advice. Production
-database rollout requires its own review.
+Phases 1-8 feature implementation and automated checks are complete. The
+Phase 8 plan migration still needs local PostgreSQL and integrated-stack
+verification. Plans are private and use date-only scheduled sessions, manual
+completion, optional links to logged workouts, and upcoming/history review.
+Nutrition records remain manually entered and owner-private, with no estimates,
+food catalog, or diet advice. Production database rollout requires its own
+review.
 
 ## Recommended Next Task
 
-Complete Phase 8 — Plans / Scheduling validation. Social, AI, and device
-integrations remain out of scope unless explicitly requested.
+Apply and smoke-test the Phase 8 migration against local PostgreSQL without
+resetting existing data. Social, AI, and device integrations remain out of
+scope unless explicitly requested.

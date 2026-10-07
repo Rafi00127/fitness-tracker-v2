@@ -100,13 +100,27 @@ export default function PlansPage() {
             setError("");
             setMessage("");
             try {
-              await createPlan(session, {
+              const createdPlan = await createPlan(session, {
                 name: String(form.get("name") ?? ""),
                 description: String(form.get("description") ?? "") || null,
                 startDate: String(form.get("startDate") ?? "") || null,
                 endDate: String(form.get("endDate") ?? "") || null,
               });
+              const createdSummary: PlanSummaryRecord = {
+                id: createdPlan.id,
+                name: createdPlan.name,
+                description: createdPlan.description,
+                startDate: createdPlan.startDate,
+                endDate: createdPlan.endDate,
+                itemCount: createdPlan.items.length,
+                createdAt: createdPlan.createdAt,
+                updatedAt: createdPlan.updatedAt,
+              };
               formElement.reset();
+              setPlans((current) => [
+                createdSummary,
+                ...current.filter((plan) => plan.id !== createdSummary.id),
+              ]);
               setMessage("Training plan created.");
               await loadPlans();
             } catch (cause) {

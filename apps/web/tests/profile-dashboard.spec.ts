@@ -95,7 +95,7 @@ test("shows available tracking modules and an empty goal overview", async ({
   await expect(
     page.getByRole("main").getByText("member@example.com"),
   ).toBeVisible();
-  await expect(page.getByText("Available now")).toHaveCount(5);
+  await expect(page.getByText("Available now")).toHaveCount(6);
   await expect(page.getByText("Available in Phase 5")).toHaveCount(0);
   await expect(page.getByText("Available in Phase 6")).toHaveCount(0);
   await expect(

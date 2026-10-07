@@ -108,6 +108,11 @@ Before feature completion and before merging changes, the project should run the
 
 ## 8. Current Test Assumptions
 
+The Playwright suite uses one worker by default. A four-worker run exhausted
+memory in the current development environment, while the serial suite passes.
+Increase parallelism only after confirming the target environment has enough
+memory.
+
 Phase 3 adds API service tests for profile ownership-scoped lookups/updates and dashboard summary behavior, plus API endpoint tests for authentication, validation, and authenticated user scoping. Playwright covers signed-out dashboard redirection, dashboard empty/future-phase states, and profile editing. The API tests mock persistence and browser tests intercept the API; neither requires a running PostgreSQL instance. Prisma schema validation does not require a live database, but applying the profile backfill migration requires PostgreSQL.
 
 Phase 3's migration and live service flow were also smoke-tested against the local Docker Compose PostgreSQL/API stack using a temporary account that was removed after verification.

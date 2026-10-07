@@ -249,7 +249,8 @@ test("creates a plan, schedules and completes a session, links a workout, and re
     page
       .locator("li")
       .filter({ hasText: "Strength day" })
-      .getByText("Completed"),
+      .locator("span")
+      .getByText("Completed", { exact: true }),
   ).toBeVisible();
 
   await page.getByLabel("Link a logged workout").selectOption("workout-1");
