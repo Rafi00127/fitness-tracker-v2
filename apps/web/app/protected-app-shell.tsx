@@ -39,7 +39,10 @@ export function ProtectedAppShell({ children }: { children: ReactNode }) {
           <Link className="font-semibold text-zinc-950" href="/dashboard">
             Fitness Tracker
           </Link>
-          <nav aria-label="Main navigation" className="flex flex-wrap items-center gap-3">
+          <nav
+            aria-label="Main navigation"
+            className="flex flex-wrap items-center gap-3"
+          >
             <Link
               className="text-sm text-zinc-700 hover:text-zinc-950"
               href="/dashboard"
@@ -87,6 +90,12 @@ export function ProtectedAppShell({ children }: { children: ReactNode }) {
               href="/nutrition"
             >
               Nutrition
+            </Link>
+            <Link
+              className="text-sm text-zinc-700 hover:text-zinc-950"
+              href="/plans"
+            >
+              Plans
             </Link>
           </nav>
           <SessionActions />

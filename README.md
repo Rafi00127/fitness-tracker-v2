@@ -163,7 +163,7 @@ See [docs/06-authentication-authorization.md](./docs/06-authentication-authoriza
 
 ## Roadmap Summary
 
-The project roadmap begins with foundational setup and proceeds through authentication, profile/dashboard, workouts and exercises, water and measurements, goals and charts, nutrition, plans and scheduling, then optional social and AI/device integrations. Plans and scheduling remain Phase 8, not an MVP requirement.
+The project roadmap begins with foundational setup and proceeds through authentication, profile/dashboard, workouts and exercises, water and measurements, goals and charts, nutrition, plans and scheduling, then optional social and AI/device integrations. Phase 8 plans and scheduling are being implemented as a later phase and are not an initial MVP requirement.
 
 This is intentionally staged so later phases do not become MVP requirements. The full roadmap is documented in [docs/09-development-roadmap.md](./docs/09-development-roadmap.md).
 
@@ -182,16 +182,14 @@ This project documentation uses a conservative approach when details are not yet
 
 ## Validation Status
 
-Phases 1-7 are implemented and validated. Nutrition records are manually
-entered and owner-private. The feature uses optional user-entered
-calorie/macronutrient values and does not estimate missing values, provide a
-food catalog, or recommend a diet. Prisma validation and migration status,
-lint, type checks, API unit and endpoint tests, Playwright, production builds,
-Docker image builds, and live local API ownership/aggregation checks pass.
-The database migration has been verified only against local development
-PostgreSQL; production rollout requires its own review.
+Phases 1-7 are implemented and validated. Phase 8 — Plans / Scheduling is in
+progress. It is scoped to private training plans, date-only scheduled
+sessions, manual completion or optional links to logged workouts, and
+upcoming/history review. Nutrition records remain manually entered and
+owner-private, with no estimates, food catalog, or diet advice. Production
+database rollout requires its own review.
 
 ## Recommended Next Task
 
-Phase 7 is complete. Phase 8 — Plans / Scheduling remains deferred until
-explicitly requested.
+Complete Phase 8 — Plans / Scheduling validation. Social, AI, and device
+integrations remain out of scope unless explicitly requested.

@@ -231,8 +231,49 @@ nutrient, its recorded-value count and sum, so clients can disclose that
 totals include only logged values. The API does not infer nutrients or provide
 nutrition advice.
 
-Plans and scheduling remain a later roadmap phase and are not part of this
-contract.
+## 11. Plans and Scheduling Endpoints
+
+All plan and schedule endpoints require an access-token bearer header. The
+authenticated token subject supplies the owner scope.
+
+Plans:
+
+- `GET /api/v1/plans?page=1&limit=20` lists the user's plans.
+- `POST /api/v1/plans` creates a plan with a required `name` (1-100
+  characters), optional `description` (up to 1000 characters), and optional
+  date-only `startDate` / `endDate`.
+- `GET /api/v1/plans/:id` returns an owned plan and its dated items.
+- `PATCH /api/v1/plans/:id` updates supplied plan fields. Dates may be set to
+  `null`; start date must not be later than end date.
+- `DELETE /api/v1/plans/:id` deletes the plan and its scheduled items, not
+  the referenced workout records.
+
+Scheduled items:
+
+- `GET /api/v1/plans/:planId/items?page=1&limit=20` lists items in the plan.
+- `POST /api/v1/plans/:planId/items` creates an item with required `title`
+  (1-120 characters) and date-only `scheduledDate`, and optional `notes` (up
+  to 1000 characters).
+- `PATCH /api/v1/plans/:planId/items/:itemId` updates item fields and may
+  set `workoutId` to an owned workout ID or `null`. Linking marks the item
+  complete. `completed` may be set to `true` or `false` for manual completion;
+  an item linked to a workout cannot be marked incomplete until unlinked.
+- `DELETE /api/v1/plans/:planId/items/:itemId` deletes only the scheduled
+  item.
+- `GET /api/v1/plans/schedule?view=upcoming|history&page=1&limit=20` returns
+  the user's dated items with their parent plan and optional linked workout.
+  Upcoming includes today and future dates in UTC; history includes dates
+  before today. Results are ordered by scheduled date, then creation time.
+
+The API rejects invalid date ranges, unknown fields, and links to workouts
+outside the authenticated user's ownership. A logged workout can be linked
+to at most one scheduled item. Removing a linked workout sets the optional
+link to null but preserves the session's completed state. Plan dates and
+schedule items are calendar-date based, with no recurrence or time-of-day
+scheduling. When plan date bounds are set, each scheduled date must fall
+within those bounds; updates that exclude existing items are rejected.
+
+## 12. Pagination, Filtering, and Sorting
 
 ## 11. Pagination, Filtering, and Sorting
 
@@ -251,7 +292,7 @@ Example:
 GET /api/v1/workouts?page=1&limit=20&sort=date&order=desc
 ```
 
-## 12. Validation and Request Rules
+## 13. Validation and Request Rules
 
 - validate required fields and types
 - reject malformed IDs or invalid date strings
@@ -259,7 +300,7 @@ GET /api/v1/workouts?page=1&limit=20&sort=date&order=desc
 - reject overly large payloads when appropriate
 - use consistent DTO validation on the backend
 
-## 13. Authorization Rules
+## 14. Authorization Rules
 
 Every protected route must enforce authorization.
 
@@ -269,7 +310,7 @@ Rules:
 - resource IDs are not trusted as ownership proof
 - frontend hiding of controls is not a substitute for server-side authorization
 
-## 14. Versioning
+## 15. Versioning
 
 The API uses path-based versioning:
 
@@ -279,16 +320,16 @@ The API uses path-based versioning:
 
 This maintains separation from future API changes without affecting the MVP design.
 
-## 15. Idempotency and Safety
+## 16. Idempotency and Safety
 
 - use idempotency keys for sensitive or repeated writes when needed
 - avoid unsafe or ambiguous delete semantics without confirmation
 - treat create operations as explicit and validated actions
 
-## 16. Open API / Contract Plan
+## 17. Open API / Contract Plan
 
 The project intends to document the API explicitly as implementation begins. During the documentation-first phase, the exact OpenAPI or generated contract is not required, but the route conventions and domain resources should remain consistent with the broader product documentation.
 
-## 17. Current Assumptions
+## 18. Current Assumptions
 
-The workout edit child-list replacement rule and exercise-delete conflict behavior are conservative Phase 4 choices, not immutable product requirements. Exercise taxonomy and whether duplicates should be forbidden remain open decisions; categories are free text and names may repeat until specified otherwise. The Phase 6 goal metric set and UTC progress windows are conservative initial choices; adding metrics or manual progress requires an approved requirement. Phase 7 nutrition routes implement manually recorded entries and summaries only. Plan endpoints remain future direction and must wait for the matching roadmap phase.
+The workout edit child-list replacement rule and exercise-delete conflict behavior are conservative Phase 4 choices, not immutable product requirements. Exercise taxonomy and whether duplicates should be forbidden remain open decisions; categories are free text and names may repeat until specified otherwise. The Phase 6 goal metric set and UTC progress windows are conservative initial choices; adding metrics or manual progress requires an approved requirement. Phase 7 nutrition routes implement manually recorded entries and summaries only. Phase 8 uses date-only schedule items, manual completion or optional owner-validated workout links, and no recurring schedule rules.

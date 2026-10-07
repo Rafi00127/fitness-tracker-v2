@@ -131,6 +131,18 @@
       and roadmap documentation
 - [x] apply migration to local PostgreSQL and validate the integrated stack
 
+## 19. Phase 8 — Plans / Scheduling
+
+- [ ] add owner-scoped Plan and date-only PlanItem models and additive migration
+- [ ] implement authenticated plan and nested schedule-item CRUD
+- [ ] enforce owner-validated optional workout links and single-item linkage
+- [ ] support manual completion and upcoming/history schedule queries
+- [ ] build responsive plan management and schedule review UI
+- [ ] add service, API validation/ownership, and Playwright coverage
+- [ ] update product, architecture, database, API, UI, security, testing,
+      migration, roadmap, and README documentation
+- [ ] apply migration to local PostgreSQL and validate the integrated stack
+
 ## 18. Phase 7 — Nutrition
 
 - [x] add owner-scoped NutritionEntry model and additive migration

@@ -57,6 +57,7 @@ Expected frontend responsibilities:
 - nutrition and water logging forms
 - nutrition history and recorded-value summaries
 - profile management screens
+- lightweight plan and schedule management
 - responsive layouts and accessibility handling
 - error, loading, empty, and validation states
 
@@ -79,6 +80,7 @@ Recommended module boundaries:
 - progress summaries and chart data remain in the relevant domain services
 - nutrition
 - plans
+- scheduled plan items (within the plans domain)
 - scheduling
 
 This list is a starting point, not an absolute guarantee. Module boundaries may evolve as the product grows, but changes must be documented.

@@ -20,6 +20,7 @@ const moduleNames: Record<
   measurements: "Measurements",
   goals: "Goals",
   nutrition: "Nutrition",
+  plans: "Plans",
 };
 
 export default function DashboardPage() {
@@ -210,6 +211,14 @@ export default function DashboardPage() {
                         View nutrition log
                       </Link>
                     )}
+                    {item.key === "plans" && item.available && (
+                      <Link
+                        className="mt-3 inline-block text-sm font-medium text-zinc-700 underline underline-offset-4"
+                        href="/plans"
+                      >
+                        View plans and schedule
+                      </Link>
+                    )}
                   </article>
                 ))}
               </div>
@@ -249,13 +258,18 @@ export default function DashboardPage() {
                       className="rounded-xl border border-zinc-200 bg-white p-5"
                       key={goal.id}
                     >
-                      <h3 className="font-medium text-zinc-950">{goal.title}</h3>
+                      <h3 className="font-medium text-zinc-950">
+                        {goal.title}
+                      </h3>
                       <p className="mt-1 text-sm text-zinc-600">
                         {goal.currentValue === null
                           ? "Record a weight measurement to see progress."
                           : `${goal.currentValue.toLocaleString()} of ${goal.targetValue.toLocaleString()} · ${goal.status.toLowerCase()}`}
                       </p>
-                      <label className="sr-only" htmlFor={`dashboard-goal-${goal.id}`}>
+                      <label
+                        className="sr-only"
+                        htmlFor={`dashboard-goal-${goal.id}`}
+                      >
                         {goal.title} progress
                       </label>
                       <progress

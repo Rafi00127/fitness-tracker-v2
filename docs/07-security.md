@@ -131,3 +131,9 @@ Phase 7 nutrition entries and summaries are sensitive user-owned records.
 Every query and mutation is scoped to the authenticated subject, DTOs validate
 date, text, and numeric bounds, and summaries exclude other users' records.
 Meal descriptions, notes, and nutrient values must not be included in logs.
+
+Phase 8 plans and schedule items are private user-owned records. Nested item
+operations must verify the authenticated owner through the plan; workout
+linking must verify that the workout has that same owner. Plan deletion must
+not delete workout history, and schedule queries must never return another
+user's plans or linked workouts.

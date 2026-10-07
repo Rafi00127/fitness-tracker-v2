@@ -95,9 +95,18 @@ Progress charts show existing water, workout, and weight history only.
 
 ### 4.7 Plans and Scheduling
 
-- Users can define training plans or routine schedules.
-- Users can assign workouts to planned dates or time windows.
-- Users can view upcoming or completed scheduled activities.
+- Users can create private training plans with a name, optional description,
+  and optional date bounds.
+- Users can add dated workout sessions to a plan and review upcoming and past
+  scheduled sessions.
+- Users can mark a scheduled session complete manually or link it to one of
+  their logged workouts; linking also marks it complete.
+- Users can edit or delete plans and their scheduled sessions without
+  deleting logged workout history.
+
+Phase 8 intentionally uses calendar dates rather than time slots or recurring
+calendar rules. It does not generate workout programs or automatically match
+logged workouts to scheduled sessions.
 
 ## 5. Non-Functional Requirements
 
@@ -133,7 +142,8 @@ The following items are deferred until later phases and are not required MVP fun
 - AI-generated workout or nutrition recommendations
 - wearable or device integrations
 - external coach collaboration workflows
-- plans and scheduling (Phase 8)
+- plans and scheduling are implemented in Phase 8 but remain outside the
+  initial MVP scope
 - advanced analytics or prediction systems
 
 ## 8. Assumptions and Open Decisions
@@ -152,6 +162,14 @@ semantics, and additional validation/privacy decisions.
 Current assumption: Phase 7 stores manually entered meal descriptions and
 optional nutrient values only.
 Impact: Food lookup and nutrient inference remain out of scope.
+
+Phase 8 assumption:
+Scheduled sessions use calendar dates without time-of-day or recurrence. A
+logged workout may be linked to at most one scheduled session; links are
+owner-validated, and removing a plan or scheduled session never deletes the
+logged workout. Completion can be recorded manually or by linking a workout.
+When plan date bounds are set, scheduled sessions must stay within those
+bounds; bounds cannot be changed to exclude existing scheduled sessions.
 
 Open Decision:
 Question: What exact plan scheduling model is needed?

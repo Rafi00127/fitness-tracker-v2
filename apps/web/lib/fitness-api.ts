@@ -34,7 +34,8 @@ export interface DashboardSummary {
     exercises: string[];
   }>;
   trackingModules: Array<{
-    key: "workouts" | "water" | "measurements" | "goals" | "nutrition";
+    key:
+      "workouts" | "water" | "measurements" | "goals" | "nutrition" | "plans";
     available: boolean;
     plannedPhase: number;
   }>;
@@ -95,9 +96,7 @@ export interface MeasurementRecord {
 }
 
 export type GoalMetric =
-  | "DAILY_WATER_ML"
-  | "WEEKLY_WORKOUTS"
-  | "TARGET_WEIGHT_KG";
+  "DAILY_WATER_ML" | "WEEKLY_WORKOUTS" | "TARGET_WEIGHT_KG";
 
 export interface GoalRecord {
   id: string;
@@ -210,6 +209,66 @@ export interface NutritionInput {
   carbsGrams?: number | null;
   fatsGrams?: number | null;
   notes?: string | null;
+}
+
+export interface PlanSummaryRecord {
+  id: string;
+  name: string;
+  description: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  itemCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PlanItemRecord {
+  id: string;
+  planId: string;
+  title: string;
+  scheduledDate: string;
+  notes: string | null;
+  workoutId: string | null;
+  completed: boolean;
+  completedAt: string | null;
+  workout: {
+    id: string;
+    title: string;
+    date: string;
+    durationMinutes: number | null;
+  } | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PlanRecord {
+  id: string;
+  name: string;
+  description: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  createdAt: string;
+  updatedAt: string;
+  items: PlanItemRecord[];
+}
+
+export interface PlanScheduleRecord extends PlanItemRecord {
+  plan: { id: string; name: string };
+}
+
+export interface PlanInput {
+  name: string;
+  description?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+}
+
+export interface PlanItemInput {
+  title?: string;
+  scheduledDate?: string;
+  notes?: string | null;
+  workoutId?: string | null;
+  completed?: boolean;
 }
 
 export async function getProfile(session: AuthSession): Promise<ProfileData> {
@@ -579,6 +638,181 @@ export async function deleteNutritionEntry(
   }
 }
 
+export async function getPlans(
+  session: AuthSession,
+  options: { page?: number; limit?: number } = {},
+): Promise<PaginatedResult<PlanSummaryRecord>> {
+  const query = new URLSearchParams({
+    page: String(options.page ?? 1),
+    limit: String(options.limit ?? 20),
+  });
+  const response = await requestEnvelope(
+    `/plans?${query.toString()}`,
+    session.accessToken,
+  );
+  if (
+    !Array.isArray(response.data) ||
+    !response.data.every(isPlanSummaryRecord) ||
+    !isPagination(response.meta.pagination)
+  ) {
+    throw new Error("The plans service returned an invalid response.");
+  }
+  return { items: response.data, pagination: response.meta.pagination };
+}
+
+export async function getPlan(
+  session: AuthSession,
+  planId: string,
+): Promise<PlanRecord> {
+  const data = await requestData(
+    `/plans/${encodeURIComponent(planId)}`,
+    session.accessToken,
+  );
+  if (!isPlanRecord(data)) {
+    throw new Error("The plans service returned an invalid response.");
+  }
+  return data;
+}
+
+export async function createPlan(
+  session: AuthSession,
+  input: PlanInput,
+): Promise<PlanRecord> {
+  const data = await requestData("/plans", session.accessToken, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+  if (!isPlanRecord(data)) {
+    throw new Error("The plans service returned an invalid response.");
+  }
+  return data;
+}
+
+export async function updatePlan(
+  session: AuthSession,
+  planId: string,
+  input: Partial<PlanInput>,
+): Promise<PlanRecord> {
+  const data = await requestData(
+    `/plans/${encodeURIComponent(planId)}`,
+    session.accessToken,
+    { method: "PATCH", body: JSON.stringify(input) },
+  );
+  if (!isPlanRecord(data)) {
+    throw new Error("The plans service returned an invalid response.");
+  }
+  return data;
+}
+
+export async function deletePlan(
+  session: AuthSession,
+  planId: string,
+): Promise<void> {
+  const data = await requestData(
+    `/plans/${encodeURIComponent(planId)}`,
+    session.accessToken,
+    { method: "DELETE" },
+  );
+  if (!isRecord(data) || data.success !== true) {
+    throw new Error("The plans service returned an invalid response.");
+  }
+}
+
+export async function getPlanItems(
+  session: AuthSession,
+  planId: string,
+  options: { page?: number; limit?: number } = {},
+): Promise<PaginatedResult<PlanItemRecord>> {
+  const query = new URLSearchParams({
+    page: String(options.page ?? 1),
+    limit: String(options.limit ?? 20),
+  });
+  const response = await requestEnvelope(
+    `/plans/${encodeURIComponent(planId)}/items?${query.toString()}`,
+    session.accessToken,
+  );
+  if (
+    !Array.isArray(response.data) ||
+    !response.data.every(isPlanItemRecord) ||
+    !isPagination(response.meta.pagination)
+  ) {
+    throw new Error("The plan schedule service returned an invalid response.");
+  }
+  return { items: response.data, pagination: response.meta.pagination };
+}
+
+export async function createPlanItem(
+  session: AuthSession,
+  planId: string,
+  input: { title: string; scheduledDate: string; notes?: string | null },
+): Promise<PlanItemRecord> {
+  const data = await requestData(
+    `/plans/${encodeURIComponent(planId)}/items`,
+    session.accessToken,
+    { method: "POST", body: JSON.stringify(input) },
+  );
+  if (!isPlanItemRecord(data)) {
+    throw new Error("The plan schedule service returned an invalid response.");
+  }
+  return data;
+}
+
+export async function updatePlanItem(
+  session: AuthSession,
+  planId: string,
+  itemId: string,
+  input: PlanItemInput,
+): Promise<PlanItemRecord> {
+  const data = await requestData(
+    `/plans/${encodeURIComponent(planId)}/items/${encodeURIComponent(itemId)}`,
+    session.accessToken,
+    { method: "PATCH", body: JSON.stringify(input) },
+  );
+  if (!isPlanItemRecord(data)) {
+    throw new Error("The plan schedule service returned an invalid response.");
+  }
+  return data;
+}
+
+export async function deletePlanItem(
+  session: AuthSession,
+  planId: string,
+  itemId: string,
+): Promise<void> {
+  const data = await requestData(
+    `/plans/${encodeURIComponent(planId)}/items/${encodeURIComponent(itemId)}`,
+    session.accessToken,
+    { method: "DELETE" },
+  );
+  if (!isRecord(data) || data.success !== true) {
+    throw new Error("The plan schedule service returned an invalid response.");
+  }
+}
+
+export async function getPlanSchedule(
+  session: AuthSession,
+  view: "upcoming" | "history",
+  options: { page?: number; limit?: number } = {},
+): Promise<PaginatedResult<PlanScheduleRecord>> {
+  const query = new URLSearchParams({
+    view,
+    page: String(options.page ?? 1),
+    limit: String(options.limit ?? 20),
+  });
+  const response = await requestEnvelope(
+    `/plans/schedule?${query.toString()}`,
+    session.accessToken,
+  );
+  if (
+    !Array.isArray(response.data) ||
+    !response.data.every(isPlanScheduleRecord) ||
+    !isPagination(response.meta.pagination)
+  ) {
+    throw new Error("The plan schedule service returned an invalid response.");
+  }
+  return { items: response.data, pagination: response.meta.pagination };
+}
+
 export async function getMeasurements(
   session: AuthSession,
   options: {
@@ -862,7 +1096,8 @@ function isTrackingModuleKey(
     value === "water" ||
     value === "measurements" ||
     value === "goals" ||
-    value === "nutrition"
+    value === "nutrition" ||
+    value === "plans"
   );
 }
 
@@ -929,9 +1164,7 @@ function isWaterEntryRecord(value: unknown): value is WaterEntryRecord {
   );
 }
 
-function isNutritionEntryRecord(
-  value: unknown,
-): value is NutritionEntryRecord {
+function isNutritionEntryRecord(value: unknown): value is NutritionEntryRecord {
   return (
     isRecord(value) &&
     typeof value.id === "string" &&
@@ -947,6 +1180,68 @@ function isNutritionEntryRecord(
   );
 }
 
+function isPlanSummaryRecord(value: unknown): value is PlanSummaryRecord {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.name === "string" &&
+    (typeof value.description === "string" || value.description === null) &&
+    (typeof value.startDate === "string" || value.startDate === null) &&
+    (typeof value.endDate === "string" || value.endDate === null) &&
+    Number.isInteger(value.itemCount) &&
+    typeof value.createdAt === "string" &&
+    typeof value.updatedAt === "string"
+  );
+}
+
+function isPlanRecord(value: unknown): value is PlanRecord {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.name === "string" &&
+    (typeof value.description === "string" || value.description === null) &&
+    (typeof value.startDate === "string" || value.startDate === null) &&
+    (typeof value.endDate === "string" || value.endDate === null) &&
+    typeof value.createdAt === "string" &&
+    typeof value.updatedAt === "string" &&
+    Array.isArray(value.items) &&
+    value.items.every(isPlanItemRecord)
+  );
+}
+
+function isPlanItemRecord(value: unknown): value is PlanItemRecord {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.planId === "string" &&
+    typeof value.title === "string" &&
+    typeof value.scheduledDate === "string" &&
+    (typeof value.notes === "string" || value.notes === null) &&
+    (typeof value.workoutId === "string" || value.workoutId === null) &&
+    typeof value.completed === "boolean" &&
+    (typeof value.completedAt === "string" || value.completedAt === null) &&
+    (value.workout === null ||
+      (isRecord(value.workout) &&
+        typeof value.workout.id === "string" &&
+        typeof value.workout.title === "string" &&
+        typeof value.workout.date === "string" &&
+        isNullableNumber(value.workout.durationMinutes))) &&
+    typeof value.createdAt === "string" &&
+    typeof value.updatedAt === "string"
+  );
+}
+
+function isPlanScheduleRecord(value: unknown): value is PlanScheduleRecord {
+  if (!isRecord(value)) return false;
+  const plan = value.plan;
+  return (
+    isPlanItemRecord(value) &&
+    isRecord(plan) &&
+    typeof plan.id === "string" &&
+    typeof plan.name === "string"
+  );
+}
+
 function isNutritionSummary(value: unknown): value is NutritionSummary {
   return (
     isRecord(value) &&
@@ -958,7 +1253,9 @@ function isNutritionSummary(value: unknown): value is NutritionSummary {
   );
 }
 
-function isNutritionValueSummary(value: unknown): value is NutritionValueSummary {
+function isNutritionValueSummary(
+  value: unknown,
+): value is NutritionValueSummary {
   return (
     isRecord(value) &&
     Number.isInteger(value.recordedEntryCount) &&
@@ -973,9 +1270,14 @@ function isMeasurementRecord(value: unknown): value is MeasurementRecord {
     isRecord(value) &&
     typeof value.id === "string" &&
     typeof value.date === "string" &&
-    ["weightKg", "waistCm", "chestCm", "hipCm", "bicepsCm", "bodyFatPercent"].every(
-      (field) => isNullableNumber(value[field]),
-    ) &&
+    [
+      "weightKg",
+      "waistCm",
+      "chestCm",
+      "hipCm",
+      "bicepsCm",
+      "bodyFatPercent",
+    ].every((field) => isNullableNumber(value[field])) &&
     (typeof value.notes === "string" || value.notes === null) &&
     typeof value.createdAt === "string" &&
     typeof value.updatedAt === "string"
@@ -1009,7 +1311,9 @@ function isGoalMetric(value: unknown): value is GoalMetric {
   );
 }
 
-function isChartPoint(value: unknown): value is { date: string; value: number } {
+function isChartPoint(
+  value: unknown,
+): value is { date: string; value: number } {
   return (
     isRecord(value) &&
     typeof value.date === "string" &&

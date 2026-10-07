@@ -129,3 +129,10 @@ aggregation, pagination, and owner isolation. Playwright covers entry
 creation/edit/deletion and the selected-range summary, including empty and
 error states. Apply the additive migration and smoke-test with temporary local
 accounts only; never reset a database containing user data.
+
+Phase 8 adds plan and scheduled-item service/API tests for validation,
+date-bound consistency, nested ownership, workout-link ownership and
+uniqueness, manual completion, link/unlink behavior, and safe deletion.
+Playwright covers plan creation, scheduling, completion, linking a logged
+workout, and upcoming/history review. Migration and live smoke validation use
+the local database only; never reset a database containing user data.

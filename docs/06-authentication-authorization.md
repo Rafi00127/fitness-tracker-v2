@@ -170,3 +170,15 @@ The backend is the single source of truth for access decisions.
   and range aggregates; clients cannot select another owner.
 - Nutrient totals include only non-null values belonging to that owner and
   selected inclusive date range.
+
+## 20. Phase 8 Plans and Scheduling Access
+
+- Plan, schedule-item, and schedule-list endpoints require the access-token
+  guard and derive ownership from the verified subject.
+- A scheduled item is accessed through its owning plan; plan ID, item ID, and
+  workout ID are all verified server-side.
+- A linked workout must belong to the same authenticated user. A workout may
+  be linked to at most one scheduled item.
+- Plan deletion removes only its plan items. Workout deletion unlinks any
+  scheduled item and does not delete the item or other plan data; the
+  scheduled item's completion state remains unchanged.

@@ -66,6 +66,7 @@ test("shows available tracking modules and an empty goal overview", async ({
             { key: "measurements", available: true, plannedPhase: 5 },
             { key: "goals", available: true, plannedPhase: 6 },
             { key: "nutrition", available: true, plannedPhase: 7 },
+            { key: "plans", available: true, plannedPhase: 8 },
           ],
         },
         meta: { timestamp: new Date().toISOString() },
@@ -107,7 +108,14 @@ test("shows available tracking modules and an empty goal overview", async ({
   await expect(
     page.getByRole("link", { name: "View nutrition log" }),
   ).toBeVisible();
-  await expect(page.getByText("Create a goal to see automatically calculated progress here.")).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "View plans and schedule" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText(
+      "Create a goal to see automatically calculated progress here.",
+    ),
+  ).toBeVisible();
   await expect(
     page.getByText(
       "Your workout history will appear here after you log a workout.",
@@ -138,6 +146,7 @@ test("shows automatically calculated goal progress on the dashboard", async ({
             { key: "measurements", available: true, plannedPhase: 5 },
             { key: "goals", available: true, plannedPhase: 6 },
             { key: "nutrition", available: true, plannedPhase: 7 },
+            { key: "plans", available: true, plannedPhase: 8 },
           ],
         },
         meta: { timestamp: new Date().toISOString() },

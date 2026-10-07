@@ -22,6 +22,7 @@ model User {
   measurements     Measurement[]
   goals            Goal[]
   nutritionEntries NutritionEntry[]
+  plans            Plan[]
 }
 
 model RefreshToken {
@@ -70,6 +71,7 @@ model Workout {
   updatedAt       DateTime          @updatedAt
   user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   exerciseEntries WorkoutExercise[]
+  planItem        PlanItem?
 
   @@index([userId, date])
 }
@@ -153,6 +155,38 @@ model NutritionEntry {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, date])
+}
+
+model Plan {
+  id          String     @id @default(cuid())
+  userId      String
+  name        String     @db.VarChar(100)
+  description String?    @db.VarChar(1000)
+  startDate   DateTime?  @db.Date
+  endDate     DateTime?  @db.Date
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items       PlanItem[]
+
+  @@index([userId, createdAt])
+}
+
+model PlanItem {
+  id            String    @id @default(cuid())
+  planId        String
+  title         String    @db.VarChar(120)
+  scheduledDate DateTime  @db.Date
+  notes         String?   @db.VarChar(1000)
+  workoutId     String?   @unique
+  completedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  plan          Plan      @relation(fields: [planId], references: [id], onDelete: Cascade)
+  workout       Workout?  @relation(fields: [workoutId], references: [id], onDelete: SetNull)
+
+  @@index([planId, scheduledDate])
+  @@index([scheduledDate])
 }
 
 enum WeightUnit {

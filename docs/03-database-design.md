@@ -218,35 +218,36 @@ Rules:
 
 Purpose: stores user-defined training plans or routine outlines.
 
-Likely fields:
+Phase 8 implementation:
 
-- id
-- userId
-- name
-- description
-- startDate
-- endDate
-- createdAt
-- updatedAt
+- `id` (cuid primary key), `userId`, `name`, optional `description`,
+  optional date-only `startDate` and `endDate`, `createdAt`, and `updatedAt`
+- plans are private and owned by one user
 
 ### PlanItem
 
-Purpose: stores workouts or scheduled blocks within a plan.
+Purpose: stores dated workout sessions scheduled within a plan.
 
-Likely fields:
+Phase 8 implementation:
 
-- id
-- planId
-- workoutId (optional)
-- scheduledDate
-- note
-- createdAt
-- updatedAt
+- `id` (cuid primary key), `planId`, `title`, date-only `scheduledDate`,
+  optional `notes`, optional `workoutId`, optional `completedAt`, and
+  timestamps
+- `workoutId` is unique when present, so a logged workout can complete at
+  most one scheduled session
+- linking a workout marks the session complete; users may also set completion
+  manually
 
 Rules:
 
-- plan item must belong to a valid plan
-- training plan functionality remains intentionally lightweight in MVP
+- plan items belong to a valid plan and inherit its owner
+- linked workouts must belong to the same authenticated user; deleting a
+  workout unlinks it without deleting the scheduled session
+- scheduled dates must fall within any plan date bounds; bounds cannot be
+  changed to exclude existing scheduled sessions
+- deleting a plan cascades to its scheduled sessions, not to logged workouts
+- scheduled sessions use dates only; recurrence, time slots, and automatic
+  workout matching are not implemented
 
 ## 4. Relationships
 
@@ -263,6 +264,7 @@ The conceptual relationship model is:
 - User has many NutritionEntry records
 - User has many Plan records
 - Plan has many PlanItem records
+- PlanItem may link to one Workout; a Workout may link to at most one PlanItem
 
 ## 5. Ownership and Authorization Rules
 

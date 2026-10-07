@@ -50,6 +50,13 @@ migration approval.
 
 ## 4. Production Safety
 
+The Phase 8 migration adds private `Plan` and `PlanItem` tables. Items use
+calendar dates, may optionally link to one workout, and retain manual or
+workout-linked completion state. Plan deletion cascades to its items; workout
+deletion clears an item link without deleting the schedule record or workout
+history. The migration is additive and must be reviewed and applied only
+through the documented Prisma workflow.
+
 Production migrations must be treated carefully. Before applying a migration to a production environment, the team should confirm:
 
 - the migration is required and approved

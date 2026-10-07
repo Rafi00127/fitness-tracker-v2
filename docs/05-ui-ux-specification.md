@@ -151,10 +151,15 @@ Measurement history charts are available in Phase 6. The date fields represent u
 
 ## 12. Plans and Scheduling
 
-- create a training plan
-- view plan items and scheduled activities
-- edit or delete plan items when required
-- present upcoming schedule in a readable format
+- create, view, edit, and delete a private training plan with optional
+  description and date bounds
+- add, edit, and delete dated workout sessions within a plan
+- review upcoming (including today) and historical scheduled sessions
+- manually mark an item complete or link it to a logged workout; linking
+  marks it complete, and linked workouts can be unlinked
+- clearly distinguish a scheduled item from its optional logged workout
+- provide loading, empty, validation, and API error states
+- keep dates calendar-day based; no recurrence or time-slot editor is included
 
 ## 13. Responsive Behavior
 

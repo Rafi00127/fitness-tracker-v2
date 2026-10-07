@@ -55,6 +55,10 @@ describe('AppModule (e2e)', () => {
     await request(app.getHttpServer())
       .get('/api/v1/nutrition/summary')
       .expect(401);
+    await request(app.getHttpServer()).get('/api/v1/plans').expect(401);
+    await request(app.getHttpServer())
+      .get('/api/v1/plans/schedule?view=upcoming')
+      .expect(401);
   });
 });
 

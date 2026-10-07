@@ -220,28 +220,39 @@ Exit gate:
 
 ## 9. Phase 8 — Plans / Scheduling
 
+Status:
+- implementation in progress
+
 Objective:
 - support lightweight training plans and schedule tracking
 
 Scope:
-- plan creation
-- scheduled workout items
-- upcoming and historical plan review
+- private plans with optional description and date bounds
+- date-only scheduled workout items with optional notes
+- upcoming and historical schedule review
+- manual completion and optional linking to a logged workout
 
 Dependencies:
 - workouts/exercises
 - goals/charts
 
 Acceptance criteria:
-- users can create simple plans and track scheduled workouts
-- plans remain lightweight and user-specific
+- users can create, update, and delete their plans and scheduled items
+- a session can be completed manually or by linking an owned logged workout
+- ownership is checked for plans, nested items, and workout links
+- deleting plan data never deletes logged workout history
+- plans remain lightweight, private, and outside the initial MVP requirement
 
 Validation:
-- plan management API tests
-- E2E verification of plan flow
+- plan service and authenticated API tests cover validation, ownership, and
+  completion/link behavior
+- Playwright verifies plan creation, scheduling, completion, linking, and
+  upcoming/history review
+- local migration and integrated stack are verified without resetting data
 
 Exit gate:
-- scheduling and plan logic must remain simple and not expand into a complex scheduling platform
+- scheduling remains date-only, with no recurrence, time slots, auto-matching,
+  or complex scheduling platform
 
 ## 10. Phase 9 — Optional Social Features
 
